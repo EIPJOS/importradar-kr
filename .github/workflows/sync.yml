@@ -1,0 +1,48 @@
+name: data-sync
+
+on:
+  schedule:
+    - cron: "30 20 * * *"   # 매일 05:30 KST — 식약처 부적합/회수 (일 단위 갱신)
+    - cron: "0 21 * * 0"    # 매주 월 06:00 KST — 세관장확인 + 법령 (저빈도)
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "실행할 잡 (all/requirements/rejections/recalls/laws)"
+        default: "all"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      LAW_GO_KR_OC: ${{ secrets.LAW_GO_KR_OC }}
+      CUSTOMS_REQ_ENDPOINT: ${{ secrets.CUSTOMS_REQ_ENDPOINT }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci || npm install
+
+      # 매일: 부적합 + 회수
+      - name: daily rejections
+        if: github.event.schedule == '30 20 * * *' || contains(fromJSON('["all","rejections"]'), inputs.job)
+        run: npm run sync:rejections
+      - name: daily recalls
+        if: github.event.schedule == '30 20 * * *' || contains(fromJSON('["all","recalls"]'), inputs.job)
+        run: npm run sync:recalls
+
+      # 매주: 세관장확인대상 + 법령
+      - name: weekly requirements
+        if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","requirements"]'), inputs.job)
+        run: npm run sync:requirements
+      - name: weekly law updates
+        if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
+        run: npm run sync:laws

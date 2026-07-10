@@ -1,0 +1,99 @@
+/* 수입레이더 — 관세사용 데이터 도구. 공문서 네이비 + 신호색, HS코드는 모노스페이스가 주인공 */
+:root {
+  --ink: #1b2430;
+  --ink-soft: #5b6675;
+  --paper: #f7f8f6;
+  --line: #dde1de;
+  --navy: #1f3a67;      /* 세관 공문서 남색 */
+  --navy-deep: #142647;
+  --alert: #b3261e;     /* 부적합 */
+  --amber: #8a5a00;     /* 회수 */
+  --ok: #1e6b45;
+  --mono: "SF Mono", "IBM Plex Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  line-height: 1.55;
+}
+.shell { max-width: 880px; margin: 0 auto; padding: 40px 20px 80px; }
+
+/* masthead */
+.masthead { margin-bottom: 28px; }
+.brand {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--navy-deep);
+  display: flex; align-items: baseline; gap: 10px;
+}
+.brand-mark { color: var(--alert); font-size: 18px; }
+.brand-sub { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--ink-soft); letter-spacing: 0.08em; }
+.tagline { color: var(--ink-soft); font-size: 14px; margin-top: 6px; }
+
+/* search */
+.search { display: flex; gap: 8px; margin-bottom: 24px; }
+.search input {
+  flex: 1; padding: 13px 16px; font-size: 16px; font-family: inherit;
+  border: 1.5px solid var(--line); border-radius: 6px; background: #fff;
+}
+.search input:focus { outline: 2px solid var(--navy); outline-offset: -1px; border-color: var(--navy); }
+.search button {
+  padding: 0 26px; font-size: 15px; font-weight: 700; font-family: inherit;
+  background: var(--navy); color: #fff; border: 0; border-radius: 6px; cursor: pointer;
+}
+.search button:hover { background: var(--navy-deep); }
+.search button:disabled { opacity: 0.6; cursor: wait; }
+
+/* tabs */
+.tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--navy-deep); margin-bottom: 18px; }
+.tabs button {
+  padding: 9px 16px; font-size: 14px; font-weight: 600; font-family: inherit;
+  background: transparent; border: 0; cursor: pointer; color: var(--ink-soft);
+  border-radius: 6px 6px 0 0;
+}
+.tabs button.on { background: var(--navy-deep); color: #fff; }
+.tabs em { font-style: normal; font-family: var(--mono); font-size: 12px; margin-left: 5px; opacity: 0.8; }
+
+/* table (수입요건) */
+table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); font-size: 14px; }
+th { text-align: left; padding: 10px 12px; background: #eef1ee; font-size: 12px; color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.hs { font-family: var(--mono); font-weight: 600; color: var(--navy-deep); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+tr:hover td { background: #fafbf9; }
+
+/* cards (이력/법령) */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card { background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--navy); border-radius: 4px; padding: 14px 16px; }
+.card.rejection { border-left-color: var(--alert); }
+.card.recall { border-left-color: var(--amber); }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.card h3 { font-size: 15px; }
+.card h3 a { color: var(--navy-deep); }
+.badge {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px;
+  background: #eef1ee; color: var(--ink-soft); letter-spacing: 0.02em;
+}
+.badge.rejection { background: #fbeae9; color: var(--alert); }
+.badge.recall { background: #f8efd9; color: var(--amber); }
+.badge.law { background: #e8edf6; color: var(--navy); }
+time { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.reason { font-size: 13.5px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+
+.empty, .hint { color: var(--ink-soft); font-size: 14px; padding: 20px 4px; }
+.error { color: var(--alert); font-size: 14px; margin-bottom: 12px; }
+
+footer {
+  margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-soft);
+}
+
+@media (max-width: 560px) {
+  .shell { padding: 24px 14px 60px; }
+  .search { flex-direction: column; }
+  .search button { padding: 12px; }
+  th:nth-child(4), td:nth-child(4) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
