@@ -31,6 +31,7 @@
   --paper-raised: #fffdf8;
   --line: #e4ddc9;
   --navy-deep: #0e1f3d;
+  --navy-bright: #1c3f75;
   --navy: #24447a;
   --seal: #a4342a;
   --seal-soft: #f3e2df;
@@ -207,7 +208,7 @@ button, a, input, textarea {
   display: flex;
   gap: 48px;
   padding: 64px 48px 56px;
-  background: var(--navy-deep);
+  background: var(--navy-bright);
   color: var(--paper);
   position: relative;
   overflow: hidden;
