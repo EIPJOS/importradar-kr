@@ -116,8 +116,8 @@ export default function App() {
             <section className="hero">
               <div className="hero-left">
                 <div className="partner-credit">
-                  <img src="/jnb-logo.png" alt="제이엔비관세사무소" />
-                  <span>제이엔비관세사무소 · 수입통관 전문 관세사</span>
+                  <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
+                  <span>제이앤비관세사무소 · 수입통관 전문 관세사</span>
                 </div>
 
                 <h1 className="hero-title">
@@ -311,8 +311,8 @@ export default function App() {
         )}
 
         <footer>
-          <img src="/jnb-logo.png" alt="제이엔비관세사무소" className="footer-logo" />
-          <span>© {new Date().getFullYear()} 수입레이더 · ImportRadar KR · 제이엔비관세사무소</span>
+          <img src="/jnb-logo-horizontal.png" alt="제이앤비관세사무소" className="footer-logo" />
+          <span>© {new Date().getFullYear()} 수입레이더 · ImportRadar KR · 제이앤비관세사무소</span>
           <span className="disclaimer">
             본 서비스는 참고용이며 법적 효력이 없습니다. 최종 확인은 유니패스·식품안전나라·국가법령정보센터 원문을 기준으로 하시기 바랍니다.
           </span>

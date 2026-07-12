@@ -76,7 +76,7 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
       {open && <div className="sidebar-scrim" onClick={onClose} />}
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <img src="/jnb-logo.png" alt="제이엔비관세사무소" />
+          <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
           <span>수입레이더</span>
         </div>
 
@@ -93,7 +93,7 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
           ))}
         </nav>
 
-        <div className="sidebar-foot">© {new Date().getFullYear()} 제이엔비관세사무소</div>
+        <div className="sidebar-foot">© {new Date().getFullYear()} 제이앤비관세사무소</div>
       </aside>
     </>
   );
