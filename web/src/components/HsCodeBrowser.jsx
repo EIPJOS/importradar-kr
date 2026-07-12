@@ -27,7 +27,7 @@ export default function HsCodeBrowser({ onSelect }) {
     <section className="browser">
       <div className="browser-head">
         <h2>HS코드 분류표</h2>
-        <span className="browser-count">전체 12,469건 중 검색</span>
+        <span className="browser-count">{q.trim() ? "전체 12,469건 중 검색" : "자주 조회되는 품목"}</span>
       </div>
 
       <input

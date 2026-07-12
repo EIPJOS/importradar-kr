@@ -42,19 +42,40 @@ export async function searchUnified(q) {
   return data;
 }
 
+// 자주 조회되는 품목 (기본 목록) — 해외직구/개인통관 관련 FAQ·관세청 상담사례에서
+// 실제로 자주 언급되는 카테고리를 조사해서, 우리 DB에 실존하는 코드만 골랐다(임의 생성 아님).
+const POPULAR_HS_CODES = [
+  "8517130000", "8471300000", "3303001000", "3307904000", "6307904020",
+  "2101111000", "1806201000", "0902200000", "0902400000", "0813500000",
+  "9503003300", "9503001", "8715000000", "9619001010", "6109101000",
+  "6202301000", "6404110000", "6403400000", "9004901000", "9005100000",
+  "2203000000", "2204291000", "2204292000", "2204100000", "2208301000",
+  "2208302000", "2309101000", "2309102000", "3004501000", "3004503000",
+  "3003903000", "2404121000", "7104210000", "4203109010", "6912001010",
+];
+
 // HS코드 분류표 탐색: 숫자면 코드 앞자리 일치, 아니면 한글/영문 품목명 부분일치.
-// 12,469건 전체를 한 번에 안 불러오고 최대 60건만 서버에서 필터링해 가져온다.
+// 검색어가 비어 있으면(초기 화면) 자주 조회되는 품목을 보여준다 — DB 순서(0101부터 시작하는
+// 축산물류) 그대로 노출하면 실사용자가 궁금해할 만한 품목과 무관해서 체감 유용성이 떨어진다.
 export async function browseHsCodes(q) {
   const query = q.trim();
-  let builder = supabase.from("hs_codes").select("hs_code,name_ko,name_en").eq("country_code", "KR");
 
-  if (query) {
-    const digits = query.replace(/\D/g, "");
-    if (digits && digits === query) {
-      builder = builder.like("hs_code", `${digits}%`);
-    } else {
-      builder = builder.or(`name_ko.ilike.%${query}%,name_en.ilike.%${query}%`);
-    }
+  if (!query) {
+    const { data, error } = await supabase
+      .from("hs_codes")
+      .select("hs_code,name_ko,name_en")
+      .in("hs_code", POPULAR_HS_CODES);
+    if (error) throw error;
+    const order = new Map(POPULAR_HS_CODES.map((c, i) => [c, i]));
+    return (data ?? []).sort((a, b) => (order.get(a.hs_code) ?? 999) - (order.get(b.hs_code) ?? 999));
+  }
+
+  let builder = supabase.from("hs_codes").select("hs_code,name_ko,name_en").eq("country_code", "KR");
+  const digits = query.replace(/\D/g, "");
+  if (digits && digits === query) {
+    builder = builder.like("hs_code", `${digits}%`);
+  } else {
+    builder = builder.or(`name_ko.ilike.%${query}%,name_en.ilike.%${query}%`);
   }
 
   const { data, error } = await builder.order("hs_code", { ascending: true }).limit(60);
