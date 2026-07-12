@@ -122,11 +122,11 @@ export default function App() {
                 </li>
                 <li>
                   <span>한국의약품수출입협회</span>
-                  <span className="pill ok">승인기관</span>
+                  <span className="pill info">승인기관</span>
                 </li>
                 <li>
                   <span>한국동물약품협회</span>
-                  <span className="pill ok">승인기관</span>
+                  <span className="pill info">승인기관</span>
                 </li>
                 <li>
                   <span>적용시작일</span>
@@ -164,13 +164,13 @@ export default function App() {
             <>
               <nav className="tabs">
                 <button className={tab === "req" ? "on" : ""} onClick={() => setTab("req")}>
-                  수입요건 <em>{req.length}</em>
+                  <span className="tab-dot req" /> 수입요건 <em>{req.length}</em>
                 </button>
                 <button className={tab === "hist" ? "on" : ""} onClick={() => setTab("hist")}>
-                  부적합·회수 이력 <em>{hist.length}</em>
+                  <span className="tab-dot hist" /> 부적합·회수 이력 <em>{hist.length}</em>
                 </button>
                 <button className={tab === "reg" ? "on" : ""} onClick={() => setTab("reg")}>
-                  법령 업데이트 <em>{regs.length}</em>
+                  <span className="tab-dot reg" /> 법령 업데이트 <em>{regs.length}</em>
                 </button>
               </nav>
 
