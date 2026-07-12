@@ -4,11 +4,10 @@ on:
   schedule:
     - cron: "30 20 * * *"   # 매일 05:30 KST — 식약처 부적합/회수 (일 단위 갱신)
     - cron: "0 21 * * 0"    # 매주 월 06:00 KST — 법령 (저빈도)
-    - cron: "0 22 5 1 *"    # 매년 1월 5일 07:00 KST — HS코드 마스터 (연 1회 갱신)
   workflow_dispatch:
     inputs:
       job:
-        description: "실행할 잡 (all/rejections/recalls/laws/hscodes)"
+        description: "실행할 잡 (all/rejections/recalls/laws)"
         default: "all"
 
 jobs:
@@ -47,7 +46,7 @@ jobs:
         if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
         run: npm run sync:laws
 
-      # 매년: HS코드 마스터 목록 (name_ko/name_en) — XLSX 파일, atchFileId는 매년 갱신 필요
-      - name: annual hs codes
-        if: github.event.schedule == '0 22 5 1 *' || contains(fromJSON('["all","hscodes"]'), inputs.job)
-        run: npm run sync:hscodes
+      # HS코드 마스터 목록(pipeline/jobs/sync_hs_codes.js)은 GitHub Actions에서 자동 실행 안 함:
+      # www.data.go.kr(포털)이 해외/클라우드 IP를 차단해 GH Actions 러너에서 연결 자체가 안 됨
+      # (apis.data.go.kr API 서버는 별도 인프라라 문제없음). 연 1회, 한국 IP인 사용자 브라우저에서
+      # 파일을 직접 파싱해 Supabase Edge Function(hs-codes-bulk-load)으로 업로드하는 방식으로 대체.

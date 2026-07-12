@@ -2,6 +2,11 @@
 // 이 데이터는 REST API가 아니라 연 1회 갱신되는 XLSX 파일로 제공된다(data.go.kr 15049722).
 // 인증키 없이 GET으로 바로 다운로드 가능한 공개 엔드포인트를 사용한다.
 //
+// ⚠️ www.data.go.kr(포털)은 해외/클라우드 IP를 차단해서 GitHub Actions에서는 연결 자체가 안 된다
+//    (apis.data.go.kr API 서버는 별도 인프라라 문제없음). 이 스크립트는 한국 IP 환경(로컬 PC 등)에서만
+//    동작한다 — CI 자동화 목적이면 Supabase Edge Function "hs-codes-bulk-load"를 대신 쓸 것
+//    (브라우저에서 파일을 직접 파싱해 배치로 업로드).
+//
 // ⚠️ 매년 1월에 새 연도판이 새 atchFileId로 등록되므로, 아래 URL은 매년 1회 수동으로
 //    최신 연도 링크로 교체해야 한다. data.go.kr에서 "관세청_HS부호_{연도}0101" 검색 →
 //    다운로드 버튼 클릭 시 네트워크 요청에서 cmm/cmm/fileDownload.do?atchFileId=... 확인.
