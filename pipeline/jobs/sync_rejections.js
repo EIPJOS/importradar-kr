@@ -1,5 +1,5 @@
-// ì‹ì•½ì²˜_ìˆ˜ìž…ì‹í’ˆ ë¶€ì í•© ì •ë³´ â†’ rejection_history (source='rejection')
-// Endpoint (í™•ì¸ë¨): https://apis.data.go.kr/1471000/PrsecImproptFoodInfoService03/getPrsecImproptFoodList01
+// 식약처_수입식품 부적합 정보 -> rejection_history (source='rejection')
+// Endpoint (확인됨): https://apis.data.go.kr/1471000/PrsecImproptFoodInfoService03/getPrsecImproptFoodList01
 import { fetchAllPages } from "../lib/datagovkr.js";
 import { upsertChunked, db } from "../lib/supabase.js";
 import { summarizeBatch } from "../lib/summarize.js";
@@ -39,7 +39,7 @@ async function main() {
   console.log(`fetched ${items.length} rejection records`);
   const rows = items.map(normalize).filter((r) => r.external_key);
 
-  // ì´ë¯¸ ìš”ì•½ëœ í‚¤ëŠ” ì œì™¸í•˜ê³  ì‹ ê·œë¶„ë§Œ ìš”ì•½ (ë¹„ìš© ì ˆê°)
+  // 이미 요약된 키는 제외하고 신규분만 요약 (비용 절감)
   const { data: existing } = await db
     .from("rejection_history")
     .select("external_key")
@@ -50,8 +50,8 @@ async function main() {
   const fresh = rows.filter((r) => !done.has(r.external_key) && r.reason);
 
   const summaries = await summarizeBatch(
-    fresh.slice(0, 200).map((r) => `í’ˆëª©: ${r.product_name}\nì‚¬ìœ : ${r.reason}`),
-    "ë‹¤ìŒ ìˆ˜ìž…ì‹í’ˆ í†µê´€ ë¶€ì í•© ì‚¬ìœ ë¥¼ ê´€ì„¸ì‚¬ê°€ í•œëˆˆì— íŒŒì•…í•  ìˆ˜ ìžˆê²Œ í•œêµ­ì–´ 1ë¬¸ìž¥ìœ¼ë¡œ ìš”ì•½. ìš”ì•½ë¬¸ë§Œ ì¶œë ¥."
+    fresh.slice(0, 200).map((r) => `품목: ${r.product_name}\n사유: ${r.reason}`),
+    "다음 수입식품 통관 부적합 사유를 관세사가 한눈에 파악할 수 있게 한국어 1문장으로 요약. 요약문만 출력."
   );
   fresh.slice(0, 200).forEach((r, i) => (r.reason_summary = summaries[i]));
 
