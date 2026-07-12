@@ -37,6 +37,7 @@ function normalize(item) {
 async function main() {
   const items = await fetchAllPages(ENDPOINT, { type: "json" });
   console.log(`fetched ${items.length} rejection records`);
+  console.log("DEBUG raw sample:", JSON.stringify(items[0], null, 2));
   const rows = items.map(normalize).filter((r) => r.external_key);
 
   // 이미 요약된 키는 제외하고 신규분만 요약 (비용 절감)
