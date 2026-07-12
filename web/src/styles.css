@@ -666,7 +666,7 @@ footer {
   font-size: 12px;
   color: var(--ink-soft);
 }
-.footer-logo { height: 40px; width: auto; max-width: 100%; margin-bottom: 8px; }
+.footer-logo { width: 100%; max-width: 320px; height: auto; margin-bottom: 12px; }
 
 /* ══════════════════════ 반응형 & 접근성 ══════════════════════ */
 @media (max-width: 900px) {
