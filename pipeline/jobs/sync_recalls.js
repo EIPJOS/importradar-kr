@@ -17,20 +17,20 @@ const toDate = (s) => {
 };
 
 function normalize(item) {
-  const product = pick(item, "PRDT_NM", "prdtNm", "PRDLST_NM");
-  const date = toDate(pick(item, "RECL_BGN_DT", "reclBgnDt", "CRET_DTM", "FRST_REG_DT"));
-  const company = pick(item, "BSSH_NM", "bsshNm", "MUFC_NM");
-  const reason = pick(item, "RECL_RSN_CN", "reclRsnCn", "RTRVL_RSN", "STOP_SALE_RSN");
+  const product = pick(item, "PRDT_NM");
+  const date = toDate(pick(item, "RECL_COMND_DT"));
+  const company = pick(item, "CLNT_BSSH_NM");
+  const reason = pick(item, "RECL_RESN_CONT");
   return {
     country_code: "KR",
     source: "recall",
     external_key: [product, company, date].filter(Boolean).join("|"),
     product_name: product,
     hs_code: null, // 원천에 HS 없음 - 2단계 품목명 매핑 대상
-    origin_country: pick(item, "MNF_CNTY_NM", "MUFC_NTN_NM"),
+    origin_country: null, // 이 API엔 원산지 필드 없음(처리업체 주소만 제공)
     company_name: company,
     reason,
-    recall_grade: pick(item, "RECL_GRAD_NM", "reclGradNm", "RTRVL_GRDCD_NM"),
+    recall_grade: pick(item, "RECL_GRAD_CD_NM"),
     event_date: date,
     raw: item,
   };

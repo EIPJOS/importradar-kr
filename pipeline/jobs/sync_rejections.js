@@ -16,17 +16,17 @@ const toDate = (s) => {
 };
 
 function normalize(item) {
-  const product = pick(item, "PRDT_NM", "prdtNm", "PRDLST_NM", "itemName");
-  const date = toDate(pick(item, "PROCS_DT", "procsDt", "INCGRTY_DT", "crtYmd"));
-  const company = pick(item, "BSSH_NM", "bsshNm", "OVSMNFST_NM", "importer");
-  const reason = pick(item, "INCGRTY_CN", "incgrtyCn", "UNSUIT_RSN", "rejectReason");
+  const product = pick(item, "PRDUCT");
+  const date = toDate(pick(item, "REGIST_DT"));
+  const company = pick(item, "ENTRPS");
+  const reason = pick(item, "IMPROPT_ITM");
   return {
     country_code: "KR",
     source: "rejection",
-    external_key: [product, company, date, reason?.slice(0, 40)].filter(Boolean).join("|"),
+    external_key: [product, company, date].filter(Boolean).join("|"),
     product_name: product,
-    hs_code: String(pick(item, "HS_NO", "hsNo", "HS_CD") ?? "").replaceAll(".", "") || null,
-    origin_country: pick(item, "MNF_CNTY_NM", "XPORT_NTNNM", "originCountry"),
+    hs_code: null, // 이 API엔 HS코드 필드 없음
+    origin_country: null,
     company_name: company,
     reason,
     event_date: date,
@@ -37,7 +37,6 @@ function normalize(item) {
 async function main() {
   const items = await fetchAllPages(ENDPOINT, { type: "json" });
   console.log(`fetched ${items.length} rejection records`);
-  console.log("DEBUG raw sample:", JSON.stringify(items[0], null, 2));
   const rows = items.map(normalize).filter((r) => r.external_key);
 
   // 이미 요약된 키는 제외하고 신규분만 요약 (비용 절감)

@@ -3,11 +3,24 @@ import { XMLParser } from "fast-xml-parser";
 
 const xml = new XMLParser({ ignoreAttributes: false });
 
+// res.text()는 서버가 실제로 어떤 인코딩을 쓰든 무조건 UTF-8로 해석한다.
+// 일부 정부 API(식약처 부적합 정보 등)는 실제로 EUC-KR로 응답을 주기 때문에
+// 그대로 쓰면 한글이 깨진다. UTF-8로 엄격 디코딩을 시도해서 실패하면
+// (유효하지 않은 바이트 시퀀스) EUC-KR로 재시도한다.
+function decodeBuffer(buf) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buf);
+  } catch {
+    return new TextDecoder("euc-kr").decode(buf);
+  }
+}
+
 async function fetchWithRetry(url, tries = 3) {
   for (let i = 0; i < tries; i++) {
     try {
       const res = await fetch(url);
-      const text = await res.text();
+      const buf = await res.arrayBuffer();
+      const text = decodeBuffer(buf);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
       return text;
     } catch (e) {
@@ -34,6 +47,8 @@ export function extractItems(body) {
   const bodyNode = response?.body ?? response;
   let items = bodyNode?.items?.item ?? bodyNode?.items ?? bodyNode?.item ?? [];
   if (items && !Array.isArray(items)) items = [items];
+  // 일부 API는 <items><item><item>...</item></item></items>처럼 item이 한 겹 더 감싸져 있다.
+  items = items.map((it) => (it && typeof it === "object" && "item" in it ? it.item : it));
   const totalCount = Number(bodyNode?.totalCount ?? bodyNode?.TOTAL_COUNT ?? items.length);
   return { items: items ?? [], totalCount };
 }
