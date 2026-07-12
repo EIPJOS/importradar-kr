@@ -2,12 +2,13 @@ name: data-sync
 
 on:
   schedule:
-    - cron: "30 20 * * *"   # 매일 05:30 KST - 식약처 부적합/회수 (일 단위 갱신)
-    - cron: "0 21 * * 0"    # 매주 월 06:00 KST - 법령 (저빈도)
+    - cron: "30 20 * * *"   # 매일 05:30 KST — 식약처 부적합/회수 (일 단위 갱신)
+    - cron: "0 21 * * 0"    # 매주 월 06:00 KST — 법령 (저빈도)
+    - cron: "0 22 5 1 *"    # 매년 1월 5일 07:00 KST — HS코드 마스터 (연 1회 갱신)
   workflow_dispatch:
     inputs:
       job:
-        description: "실행할 잡 (all/rejections/recalls/laws)"
+        description: "실행할 잡 (all/rejections/recalls/laws/hscodes)"
         default: "all"
 
 jobs:
@@ -45,3 +46,8 @@ jobs:
       - name: weekly law updates
         if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
         run: npm run sync:laws
+
+      # 매년: HS코드 마스터 목록 (name_ko/name_en) — XLSX 파일, atchFileId는 매년 갱신 필요
+      - name: annual hs codes
+        if: github.event.schedule == '0 22 5 1 *' || contains(fromJSON('["all","hscodes"]'), inputs.job)
+        run: npm run sync:hscodes
