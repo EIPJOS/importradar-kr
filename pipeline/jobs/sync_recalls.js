@@ -1,5 +1,5 @@
-// 식약처_수입식품 회수판매중지 정보 → rejection_history (source='recall')
-// Endpoint (확인됨, data.go.kr 15095378):
+// ì‹ì•½ì²˜_ìˆ˜ìž…ì‹í’ˆ íšŒìˆ˜íŒë§¤ì¤‘ì§€ ì •ë³´ â†’ rejection_history (source='recall')
+// Endpoint (í™•ì¸ë¨, data.go.kr 15095378):
 // http://apis.data.go.kr/1471000/IprtFoodReclSaleStopPrdtStusService/getIprtFoodReclSaleStopPrdtStusInq
 import { fetchAllPages } from "../lib/datagovkr.js";
 import { upsertChunked, db } from "../lib/supabase.js";
@@ -22,10 +22,11 @@ function normalize(item) {
   const company = pick(item, "BSSH_NM", "bsshNm", "MUFC_NM");
   const reason = pick(item, "RECL_RSN_CN", "reclRsnCn", "RTRVL_RSN", "STOP_SALE_RSN");
   return {
+    country_code: "KR",
     source: "recall",
     external_key: [product, company, date].filter(Boolean).join("|"),
     product_name: product,
-    hs_code: null, // 원천에 HS 없음 — 2단계 품목명 매핑 대상
+    hs_code: null, // ì›ì²œì— HS ì—†ìŒ â€” 2ë‹¨ê³„ í’ˆëª©ëª… ë§¤í•‘ ëŒ€ìƒ
     origin_country: pick(item, "MNF_CNTY_NM", "MUFC_NTN_NM"),
     company_name: company,
     reason,
@@ -42,17 +43,18 @@ async function main() {
 
   const { data: existing } = await db
     .from("rejection_history").select("external_key")
+    .eq("country_code", "KR")
     .eq("source", "recall").not("reason_summary", "is", null);
   const done = new Set((existing ?? []).map((r) => r.external_key));
   const fresh = rows.filter((r) => !done.has(r.external_key) && r.reason);
 
   const summaries = await summarizeBatch(
-    fresh.slice(0, 200).map((r) => `품목: ${r.product_name}\n회수사유: ${r.reason}`),
-    "다음 수입식품 회수 사유를 관세사가 한눈에 파악할 수 있게 한국어 1문장으로 요약. 요약문만 출력."
+    fresh.slice(0, 200).map((r) => `í’ˆëª©: ${r.product_name}\níšŒìˆ˜ì‚¬ìœ : ${r.reason}`),
+    "ë‹¤ìŒ ìˆ˜ìž…ì‹í’ˆ íšŒìˆ˜ ì‚¬ìœ ë¥¼ ê´€ì„¸ì‚¬ê°€ í•œëˆˆì— íŒŒì•…í•  ìˆ˜ ìžˆê²Œ í•œêµ­ì–´ 1ë¬¸ìž¥ìœ¼ë¡œ ìš”ì•½. ìš”ì•½ë¬¸ë§Œ ì¶œë ¥."
   );
   fresh.slice(0, 200).forEach((r, i) => (r.reason_summary = summaries[i]));
 
-  await upsertChunked("rejection_history", rows, "source,external_key");
+  await upsertChunked("rejection_history", rows, "country_code,source,external_key");
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

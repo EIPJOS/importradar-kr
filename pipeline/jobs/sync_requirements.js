@@ -1,27 +1,28 @@
-// 관세청_세관장확인대상물품(GW) → import_requirements
+// ê´€ì„¸ì²­_ì„¸ê´€ìž¥í™•ì¸ëŒ€ìƒë¬¼í’ˆ(GW) â†’ import_requirements
 //
-// ⚠️ GW 계열 API는 요청주소(오퍼레이션 경로)가 data.go.kr 활용신청 승인 후
-//    상세페이지의 Swagger(활용 명세)에서만 확인 가능하다.
-//    승인 후 확인한 전체 URL을 CUSTOMS_REQ_ENDPOINT 에 넣을 것.
-//    예상 형태: https://apis.data.go.kr/1220000/<serviceName>/<operationName>
-//    응답 포맷: XML (데이터포맷 명세 기준)
+// âš ï¸ GW ê³„ì—´ APIëŠ” ìš”ì²­ì£¼ì†Œ(ì˜¤í¼ë ˆì´ì…˜ ê²½ë¡œ)ê°€ data.go.kr í™œìš©ì‹ ì²­ ìŠ¹ì¸ í›„
+//    ìƒì„¸íŽ˜ì´ì§€ì˜ Swagger(í™œìš© ëª…ì„¸)ì—ì„œë§Œ í™•ì¸ ê°€ëŠ¥í•˜ë‹¤.
+//    ìŠ¹ì¸ í›„ í™•ì¸í•œ ì „ì²´ URLì„ CUSTOMS_REQ_ENDPOINT ì— ë„£ì„ ê²ƒ.
+//    ì˜ˆìƒ í˜•íƒœ: https://apis.data.go.kr/1220000/<serviceName>/<operationName>
+//    ì‘ë‹µ í¬ë§·: XML (ë°ì´í„°í¬ë§· ëª…ì„¸ ê¸°ì¤€)
 //
-// 요청변수(명세 기준): 품목코드(HS), 수출입구분코드
-// 응답필드(명세 기준): HS부호, 신고인확인법령코드/명, 요건승인기관코드/명, 적용시작일자
+// ìš”ì²­ë³€ìˆ˜(ëª…ì„¸ ê¸°ì¤€): í’ˆëª©ì½”ë“œ(HS), ìˆ˜ì¶œìž…êµ¬ë¶„ì½”ë“œ
+// ì‘ë‹µí•„ë“œ(ëª…ì„¸ ê¸°ì¤€): HSë¶€í˜¸, ì‹ ê³ ì¸í™•ì¸ë²•ë ¹ì½”ë“œ/ëª…, ìš”ê±´ìŠ¹ì¸ê¸°ê´€ì½”ë“œ/ëª…, ì ìš©ì‹œìž‘ì¼ìž
 import { fetchAllPages } from "../lib/datagovkr.js";
 import { upsertChunked, db } from "../lib/supabase.js";
 
 const ENDPOINT = process.env.CUSTOMS_REQ_ENDPOINT;
 if (!ENDPOINT) {
-  console.error("CUSTOMS_REQ_ENDPOINT 미설정 — 활용신청 승인 후 Swagger에서 요청주소 확인해 secrets에 추가");
+  console.error("CUSTOMS_REQ_ENDPOINT ë¯¸ì„¤ì • â€” í™œìš©ì‹ ì²­ ìŠ¹ì¸ í›„ Swaggerì—ì„œ ìš”ì²­ì£¼ì†Œ í™•ì¸í•´ secretsì— ì¶”ê°€");
   process.exit(1);
 }
 
-// 필드명은 승인 후 실제 응답 기준으로 확정할 것. 아래는 관대한 매핑.
+// í•„ë“œëª…ì€ ìŠ¹ì¸ í›„ ì‹¤ì œ ì‘ë‹µ ê¸°ì¤€ìœ¼ë¡œ í™•ì •í•  ê²ƒ. ì•„ëž˜ëŠ” ê´€ëŒ€í•œ ë§¤í•‘.
 const pick = (o, ...keys) => keys.map((k) => o?.[k]).find((v) => v != null) ?? null;
 
 function normalize(item, imexType) {
   return {
+    country_code: "KR",
     hs_code: String(pick(item, "hsSgn", "hs", "hsCode", "prnm") ?? "").replaceAll(".", ""),
     imex_type: imexType,
     law_code: pick(item, "dclrLworCd", "lworCd", "lawCd"),
@@ -43,15 +44,15 @@ const toDate = (s) => {
 async function main() {
   const rows = [];
   for (const [param, type] of [["I", "import"], ["E", "export"]]) {
-    // 수출입구분코드 파라미터명도 명세 확인 후 확정 (imexTp 가정)
+    // ìˆ˜ì¶œìž…êµ¬ë¶„ì½”ë“œ íŒŒë¼ë¯¸í„°ëª…ë„ ëª…ì„¸ í™•ì¸ í›„ í™•ì • (imexTp ê°€ì •)
     const items = await fetchAllPages(ENDPOINT, { imexTp: param });
     rows.push(...items.map((it) => normalize(it, type)).filter((r) => r.hs_code));
   }
-  await upsertChunked("import_requirements", rows, "hs_code,imex_type,law_code,agency_code,effective_from");
+  await upsertChunked("import_requirements", rows, "country_code,hs_code,imex_type,law_code,agency_code,effective_from");
 
-  // hs_codes 마스터에도 코드 축적
-  const codes = [...new Set(rows.map((r) => r.hs_code))].map((hs_code) => ({ hs_code }));
-  await upsertChunked("hs_codes", codes, "hs_code");
+  // hs_codes ë§ˆìŠ¤í„°ì—ë„ ì½”ë“œ ì¶•ì 
+  const codes = [...new Set(rows.map((r) => r.hs_code))].map((hs_code) => ({ hs_code, country_code: "KR" }));
+  await upsertChunked("hs_codes", codes, "country_code,hs_code");
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

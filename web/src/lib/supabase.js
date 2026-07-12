@@ -6,7 +6,7 @@ export const supabase = createClient(
 );
 
 export async function searchUnified(q) {
-  const { data, error } = await supabase.rpc("search_unified", { q: q.trim() });
+  const { data, error } = await supabase.rpc("search_unified", { q: q.trim(), cc: "KR" });
   if (error) throw error;
   return data;
 }
