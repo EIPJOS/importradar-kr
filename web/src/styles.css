@@ -422,6 +422,41 @@ time { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); font-v
 .browser-table tr.clickable:hover td { background: var(--teal-soft); }
 .browser-more { font-size: 12.5px; color: var(--ink-soft); padding: 12px 4px; }
 
+/* ── 빠른 HS CODE 분류 (AI) ── */
+.classify-note { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 20px; max-width: 640px; }
+.classify-form { max-width: 520px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+.classify-label { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-top: 10px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--paper-raised);
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.chip.on { background: var(--navy-deep); border-color: var(--navy-deep); color: var(--paper); }
+.classify-submit {
+  margin-top: 16px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--seal);
+  color: var(--paper);
+  border: 1.5px solid var(--navy-deep);
+  cursor: pointer;
+}
+.classify-submit:hover:not(:disabled) { background: #8f2c22; }
+.classify-submit:disabled { opacity: 0.6; cursor: wait; }
+
+.classify-results { display: flex; flex-direction: column; gap: 12px; max-width: 640px; }
+.classify-card { background: var(--paper-raised); border: 1px solid var(--line); border-left: 4px solid var(--teal); padding: 15px 17px; }
+.classify-card h3 { font-family: var(--serif); font-weight: 700; font-size: 16px; margin-top: 4px; }
+.badge.confidence-high { background: var(--ok-soft); color: var(--ok); }
+.badge.confidence-medium { background: var(--brass-soft); color: var(--brass); }
+.badge.confidence-low { background: var(--seal-soft); color: var(--seal); }
+
 footer {
   max-width: 760px;
   width: 100%;

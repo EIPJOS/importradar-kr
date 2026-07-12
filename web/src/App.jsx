@@ -3,6 +3,7 @@ import { searchUnified } from "./lib/supabase.js";
 import Seal from "./components/Seal.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import HsCodeBrowser from "./components/HsCodeBrowser.jsx";
+import QuickClassify from "./components/QuickClassify.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -93,6 +94,12 @@ export default function App() {
         {view === "browse" && (
           <div className="browse-page">
             <HsCodeBrowser onSelect={onSelectHsCode} />
+          </div>
+        )}
+
+        {view === "classify" && (
+          <div className="browse-page">
+            <QuickClassify onSelect={onSelectHsCode} />
           </div>
         )}
 

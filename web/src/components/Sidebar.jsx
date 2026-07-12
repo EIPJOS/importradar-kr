@@ -6,7 +6,7 @@ const NAV_GROUPS = [
   {
     label: "HS CODE",
     items: [
-      { label: "빠른 HS CODE 분류", soon: true },
+      { label: "빠른 HS CODE 분류", soon: false, id: "classify" },
       { label: "분류표 보기", soon: false, id: "browse" },
       { label: "코드원 (배대지 API)", soon: true },
     ],
