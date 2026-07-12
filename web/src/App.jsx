@@ -41,6 +41,10 @@ export default function App() {
       <header className="masthead">
         <div className="masthead-inner">
           <Seal size={104} className="masthead-seal" />
+          <div className="partner-credit">
+            <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
+            <span>제이앤비관세사무소가 함께합니다</span>
+          </div>
           <p className="eyebrow">IMPORT RADAR · KOREA CUSTOMS DATA</p>
           <h1 className="brand">수입레이더</h1>
           <p className="tagline">HS코드 또는 품목명 하나로 수입요건·부적합이력·법령 개정을 한 화면에서 확인합니다</p>
@@ -173,7 +177,8 @@ export default function App() {
       </main>
 
       <footer>
-        <span>© {new Date().getFullYear()} 수입레이더 · ImportRadar KR</span>
+        <img src="/jnb-logo.png" alt="제이앤비관세사무소" className="footer-logo" />
+        <span>© {new Date().getFullYear()} 수입레이더 · ImportRadar KR · 제이앤비관세사무소</span>
         <span className="disclaimer">
           본 서비스는 참고용이며 법적 효력이 없습니다. 최종 확인은 유니패스·식품안전나라·국가법령정보센터 원문을 기준으로 하시기 바랍니다.
         </span>
