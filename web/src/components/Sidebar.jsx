@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
 // 포켓커스텀 사이드바 구조를 그대로 따르되, 아직 없는 기능은 "준비중"으로
-// 정직하게 표시한다(가짜로 작동하는 척하지 않음). 실제 작동하는 건 "홈"(검색)뿐이다.
+// 정직하게 표시한다(가짜로 작동하는 척하지 않음). "홈"과 "분류표 보기"가 실제 작동한다.
 const NAV_GROUPS = [
   {
     label: "HS CODE",
     items: [
       { label: "빠른 HS CODE 분류", soon: true },
-      { label: "분류표 보기", soon: true },
+      { label: "분류표 보기", soon: false, id: "browse" },
       { label: "코드원 (배대지 API)", soon: true },
     ],
   },
@@ -33,7 +33,7 @@ const NAV_GROUPS = [
   },
 ];
 
-function NavGroup({ group, defaultOpen }) {
+function NavGroup({ group, defaultOpen, view, onNavigate }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="nav-group">
@@ -43,21 +43,32 @@ function NavGroup({ group, defaultOpen }) {
       </button>
       {open && (
         <ul className="nav-group-list">
-          {group.items.map((item) => (
-            <li key={item.label}>
-              <button className="nav-item soon" disabled title="준비 중인 기능입니다">
-                <span>{item.label}</span>
-                <span className="soon-tag">준비중</span>
-              </button>
-            </li>
-          ))}
+          {group.items.map((item) =>
+            item.soon ? (
+              <li key={item.label}>
+                <button className="nav-item soon" disabled title="준비 중인 기능입니다">
+                  <span>{item.label}</span>
+                  <span className="soon-tag">준비중</span>
+                </button>
+              </li>
+            ) : (
+              <li key={item.label}>
+                <button
+                  className={`nav-item active-link ${view === item.id ? "on" : ""}`}
+                  onClick={() => onNavigate(item.id)}
+                >
+                  <span>{item.label}</span>
+                </button>
+              </li>
+            )
+          )}
         </ul>
       )}
     </div>
   );
 }
 
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar({ open, onClose, view, onNavigate }) {
   return (
     <>
       {open && <div className="sidebar-scrim" onClick={onClose} />}
@@ -68,13 +79,15 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <nav className="sidebar-nav">
-          <button className="nav-item top on">홈</button>
+          <button className={`nav-item top ${view === "home" ? "on" : ""}`} onClick={() => onNavigate("home")}>
+            홈
+          </button>
           <button className="nav-item top soon" disabled title="준비 중인 기능입니다">
             회사소개 <span className="soon-tag">준비중</span>
           </button>
 
           {NAV_GROUPS.map((g, i) => (
-            <NavGroup key={g.label} group={g} defaultOpen={i === 0} />
+            <NavGroup key={g.label} group={g} defaultOpen={i === 0} view={view} onNavigate={onNavigate} />
           ))}
         </nav>
 

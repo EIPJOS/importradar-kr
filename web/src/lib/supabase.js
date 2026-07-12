@@ -41,3 +41,23 @@ export async function searchUnified(q) {
   data.requirementsSource = live?.source ?? null; // "live" | "cache" | null — UI에서 조회 도장 표시용
   return data;
 }
+
+// HS코드 분류표 탐색: 숫자면 코드 앞자리 일치, 아니면 한글/영문 품목명 부분일치.
+// 12,469건 전체를 한 번에 안 불러오고 최대 60건만 서버에서 필터링해 가져온다.
+export async function browseHsCodes(q) {
+  const query = q.trim();
+  let builder = supabase.from("hs_codes").select("hs_code,name_ko,name_en").eq("country_code", "KR");
+
+  if (query) {
+    const digits = query.replace(/\D/g, "");
+    if (digits && digits === query) {
+      builder = builder.like("hs_code", `${digits}%`);
+    } else {
+      builder = builder.or(`name_ko.ilike.%${query}%,name_en.ilike.%${query}%`);
+    }
+  }
+
+  const { data, error } = await builder.order("hs_code", { ascending: true }).limit(60);
+  if (error) throw error;
+  return data ?? [];
+}
