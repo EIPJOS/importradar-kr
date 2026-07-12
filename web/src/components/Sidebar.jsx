@@ -41,29 +41,31 @@ function NavGroup({ group, defaultOpen, view, onNavigate }) {
         <span>{group.label}</span>
         <span className={`chevron ${open ? "open" : ""}`}>▾</span>
       </button>
-      {open && (
-        <ul className="nav-group-list">
-          {group.items.map((item) =>
-            item.soon ? (
-              <li key={item.label}>
-                <button className="nav-item soon" disabled title="준비 중인 기능입니다">
-                  <span>{item.label}</span>
-                  <span className="soon-tag">준비중</span>
-                </button>
-              </li>
-            ) : (
-              <li key={item.label}>
-                <button
-                  className={`nav-item active-link ${view === item.id ? "on" : ""}`}
-                  onClick={() => onNavigate(item.id)}
-                >
-                  <span>{item.label}</span>
-                </button>
-              </li>
-            )
-          )}
-        </ul>
-      )}
+      <div className={`nav-group-collapse ${open ? "open" : ""}`}>
+        <div className="nav-group-collapse-inner">
+          <ul className="nav-group-list">
+            {group.items.map((item) =>
+              item.soon ? (
+                <li key={item.label}>
+                  <button className="nav-item soon" disabled title="준비 중인 기능입니다">
+                    <span>{item.label}</span>
+                    <span className="soon-tag">준비중</span>
+                  </button>
+                </li>
+              ) : (
+                <li key={item.label}>
+                  <button
+                    className={`nav-item active-link ${view === item.id ? "on" : ""}`}
+                    onClick={() => onNavigate(item.id)}
+                  >
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

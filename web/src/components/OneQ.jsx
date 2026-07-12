@@ -169,7 +169,11 @@ export default function OneQ({ onSelect }) {
               <span>{f.q}</span>
               <span className={`chevron ${openFaq === i ? "open" : ""}`}>▾</span>
             </button>
-            {openFaq === i && <p className="faq-a">{f.a}</p>}
+            <div className={`faq-collapse ${openFaq === i ? "open" : ""}`}>
+              <div className="faq-collapse-inner">
+                <p className="faq-a">{f.a}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
