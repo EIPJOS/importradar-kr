@@ -1,6 +1,29 @@
 /* 수입레이더 — 관보(官報)·통관서류에서 착안한 팔레트와 도장 모티프.
    레이아웃 구조는 포켓커스텀(사이드바+히어로+라이브데모) 참고, 톤/디테일은 우리 방식.
-   Noto Serif KR(제목) + Pretendard(본문) + IBM Plex Mono(코드/숫자). */
+   Noto Serif KR(제목) + Pretendard 자체호스팅(본문) + IBM Plex Mono(코드/숫자). */
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --ink: #1a2130;
   --ink-soft: #5c6478;
