@@ -107,6 +107,27 @@ alter table tariff_rates enable row level security;
 create policy "public read" on tariff_rates for select using (true);
 
 -- =====================================================================
+-- kc_certification_items: KC 인증대상 품목 카테고리 (제품안전정보센터 SafetyKorea,
+--   safetykorea.kr/release/itemSearch) -> pipeline/jobs/sync_kc_categories.js로 적재
+--   이 엔드포인트는 WAF가 서버측 스크립트 호출(fetch/curl)을 차단하고 브라우저의
+--   jQuery XHR 호출만 허용해서, 실제 재수집은 브라우저에서 수동으로 해야 한다
+--   (pipeline/jobs/sync_kc_categories.js 상단 주석 참고).
+--   cert_type_code: 1=전기용품 안전인증, 2=전기용품 안전확인, 4=생활용품 안전인증,
+--                   5=생활용품 안전확인, 7=어린이제품 안전인증, 8=어린이제품 안전확인
+-- =====================================================================
+create table if not exists kc_certification_items (
+  total_code       bigint primary key,          -- SafetyKorea 품목코드
+  cert_type_code    smallint not null,
+  cert_type_name    text not null,
+  category_path     text not null,              -- "대분류>중분류>소분류" 형태
+  synced_at         timestamptz not null default now()
+);
+create index if not exists idx_kc_category_trgm on kc_certification_items using gin (category_path gin_trgm_ops);
+create index if not exists idx_kc_cert_type on kc_certification_items (cert_type_code);
+alter table kc_certification_items enable row level security;
+create policy "public read" on kc_certification_items for select using (true);
+
+-- =====================================================================
 -- subscriptions: Pro 티어 워치리스트 (Stripe 연동은 후순위)
 -- =====================================================================
 create table if not exists subscriptions (

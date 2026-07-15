@@ -15,7 +15,7 @@ const NAV_GROUPS = [
     label: "도구",
     items: [
       { label: "수입 관부가세 계산기", soon: false, id: "calc" },
-      { label: "KC 인증대상 확인", soon: true },
+      { label: "KC 인증대상 확인", soon: false, id: "kc" },
     ],
   },
   {

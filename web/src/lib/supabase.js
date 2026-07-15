@@ -86,6 +86,24 @@ export async function browseHsCodes(q) {
 // HS코드의 관세율 후보 전체(기본세율/WTO협정세율/FTA국가별세율)를 가져온다.
 // 관세청_품목번호별 관세율표(data.go.kr 15051179, 연 1회 갱신 XLSX)를
 // pipeline/jobs/sync_tariff_rates.js로 적재한 tariff_rates 테이블에서 조회.
+// KC 인증대상 품목 카테고리 검색 (제품안전정보센터 SafetyKorea 스냅샷,
+// pipeline/jobs/sync_kc_categories.js로 적재한 kc_certification_items 테이블에서 조회).
+// category_path는 "대분류>중분류>소분류" 형태라, 마지막 소분류가 검색어와 정확히 일치하는
+// 행을 우선순위로 올린다(품목명 자체가 정확히 맞는 게 상위 카테고리 부분일치보다 유용함).
+export async function searchKcItems(query) {
+  const q = query.trim();
+  if (!q) return [];
+  const { data, error } = await supabase
+    .from("kc_certification_items")
+    .select("total_code,cert_type_code,cert_type_name,category_path")
+    .ilike("category_path", `%${q}%`)
+    .limit(50);
+  if (error) throw error;
+  const rows = data ?? [];
+  const exact = (r) => r.category_path.split(">").pop() === q;
+  return rows.sort((a, b) => Number(exact(b)) - Number(exact(a)));
+}
+
 export async function getTariffRates(hsCode) {
   const hs = hsCode.replace(/\D/g, "");
   const { data, error } = await supabase

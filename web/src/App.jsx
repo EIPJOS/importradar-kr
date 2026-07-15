@@ -6,6 +6,7 @@ import HsCodeBrowser from "./components/HsCodeBrowser.jsx";
 import QuickClassify from "./components/QuickClassify.jsx";
 import OneQ from "./components/OneQ.jsx";
 import DutyCalculator from "./components/DutyCalculator.jsx";
+import KcCertCheck from "./components/KcCertCheck.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -114,6 +115,12 @@ export default function App() {
         {view === "calc" && (
           <div className="browse-page">
             <DutyCalculator onSelect={onSelectHsCode} />
+          </div>
+        )}
+
+        {view === "kc" && (
+          <div className="browse-page">
+            <KcCertCheck />
           </div>
         )}
 
