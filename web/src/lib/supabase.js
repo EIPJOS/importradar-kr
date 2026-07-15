@@ -104,20 +104,20 @@ export async function searchKcItems(query) {
   return rows.sort((a, b) => Number(exact(b)) - Number(exact(a)));
 }
 
-// 식품유형 분류 검색 (식약처 식품공전 분류체계 스냅샷, pipeline/jobs/sync_food_types.js로
-// 적재한 food_types 테이블에서 조회). 대분류 또는 소분류명 부분일치로 검색하고,
-// 소분류가 정확히 일치하는 행을 우선순위로 올린다.
+// 식품유형 분류 검색 (식약처 공식 "식품유형 분류표" PDF를 직접 옮긴 스냅샷,
+// pipeline/jobs/sync_food_types.js로 적재한 food_types 테이블에서 조회).
+// 대분류/중분류/소분류명 부분일치로 검색하고, 소분류가 정확히 일치하는 행을 우선순위로 올린다.
 export async function searchFoodTypes(query) {
   const q = query.trim();
   if (!q) return [];
   const { data, error } = await supabase
     .from("food_types")
-    .select("id,major_category,sub_type")
-    .or(`sub_type.ilike.%${q}%,major_category.ilike.%${q}%`)
+    .select("id,major_category,mid_category,sub_type")
+    .or(`sub_type.ilike.%${q}%,major_category.ilike.%${q}%,mid_category.ilike.%${q}%`)
     .limit(50);
   if (error) throw error;
   const rows = data ?? [];
-  const exact = (r) => (r.sub_type ?? r.major_category) === q;
+  const exact = (r) => r.sub_type === q;
   return rows.sort((a, b) => Number(exact(b)) - Number(exact(a)));
 }
 
@@ -125,9 +125,10 @@ export async function searchFoodTypes(query) {
 export async function browseFoodTypes() {
   const { data, error } = await supabase
     .from("food_types")
-    .select("id,major_category,sub_type")
+    .select("id,major_category,mid_category,sub_type")
     .order("major_category", { ascending: true })
-    .order("sub_type", { ascending: true, nullsFirst: true });
+    .order("mid_category", { ascending: true })
+    .order("sub_type", { ascending: true });
   if (error) throw error;
   const groups = new Map();
   for (const row of data ?? []) {

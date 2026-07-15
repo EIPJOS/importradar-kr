@@ -55,7 +55,7 @@ export default function FoodTypeCheck() {
     <section className="classify">
       <div className="browser-head">
         <h2>식품유형 확인</h2>
-        <span className="browser-count">식품공전(식약처) 식품유형 분류 · 129개 유형</span>
+        <span className="browser-count">식품공전(식약처) 식품유형 분류표 · 272개 유형</span>
       </div>
       <p className="classify-note">
         가공식품의 식품유형을 검색하거나 대분류에서 직접 선택해 확인하세요. 정확한 표시기준·규격은
@@ -93,9 +93,9 @@ export default function FoodTypeCheck() {
                 초기화
               </button>
             </div>
-            <h3>{selected.sub_type ?? selected.major_category}</h3>
+            <h3>{selected.sub_type}</h3>
             <p className="meta">
-              {selected.sub_type ? `${selected.major_category} › ${selected.sub_type}` : selected.major_category}
+              {[selected.major_category, selected.mid_category, selected.sub_type].filter(Boolean).join(" › ")}
             </p>
           </article>
         </div>
@@ -106,8 +106,8 @@ export default function FoodTypeCheck() {
           <p className="classify-note">일치하는 식품유형 {results.length}건을 찾았습니다.</p>
           {results.map((r) => (
             <article key={r.id} className="classify-card" onClick={() => pickResult(r)} style={{ cursor: "pointer" }}>
-              <h3>{r.sub_type ?? r.major_category}</h3>
-              <p className="meta">{r.sub_type ? `${r.major_category} › ${r.sub_type}` : r.major_category}</p>
+              <h3>{r.sub_type}</h3>
+              <p className="meta">{[r.major_category, r.mid_category, r.sub_type].filter(Boolean).join(" › ")}</p>
             </article>
           ))}
         </div>
@@ -136,17 +136,12 @@ export default function FoodTypeCheck() {
             <div className="chip-row">
               {groups
                 .find((g) => g.major === openMajor)
-                .items.map((item) =>
-                  item.sub_type ? (
-                    <button type="button" key={item.id} className="chip" onClick={() => pickResult(item)}>
-                      {item.sub_type}
-                    </button>
-                  ) : (
-                    <button type="button" key={item.id} className="chip" onClick={() => pickResult(item)}>
-                      {item.major_category} (세부유형 없음)
-                    </button>
-                  )
-                )}
+                .items.map((item) => (
+                  <button type="button" key={item.id} className="chip" onClick={() => pickResult(item)}>
+                    {item.mid_category ? `${item.mid_category.replace(/^[\d.\-]+\s*/, "")} · ` : ""}
+                    {item.sub_type}
+                  </button>
+                ))}
             </div>
           )}
         </div>
