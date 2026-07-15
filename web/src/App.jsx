@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar.jsx";
 import HsCodeBrowser from "./components/HsCodeBrowser.jsx";
 import QuickClassify from "./components/QuickClassify.jsx";
 import OneQ from "./components/OneQ.jsx";
+import DutyCalculator from "./components/DutyCalculator.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -107,6 +108,12 @@ export default function App() {
         {view === "oneq" && (
           <div className="browse-page">
             <OneQ onSelect={onSelectHsCode} />
+          </div>
+        )}
+
+        {view === "calc" && (
+          <div className="browse-page">
+            <DutyCalculator onSelect={onSelectHsCode} />
           </div>
         )}
 

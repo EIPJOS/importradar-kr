@@ -82,6 +82,31 @@ create index if not exists idx_reg_law_name on regulation_updates (law_name);
 create index if not exists idx_reg_effective on regulation_updates (effective_on desc);
 
 -- =====================================================================
+-- tariff_rates: HS코드별 관세율 (관세청_품목번호별 관세율표, data.go.kr 15051179)
+--   연 1회 갱신되는 XLSX 파일만 제공(오픈API 없음) -> pipeline/jobs/sync_tariff_rates.js로 적재
+--   rate_type: 'A'(기본세율) | 'C'(WTO협정세율) | FTA코드(FCN1=한중,FUS1=한미,FEU1=한EU,
+--              FVN1=한베트남,FAS1=한아세안,FRCJP1=RCEP한일 등)
+-- =====================================================================
+create table if not exists tariff_rates (
+  id              bigint generated always as identity primary key,
+  hs_code         text not null,
+  rate_type       text not null,
+  rate_percent    numeric,                      -- 관세율(%), null이면 단위당세액만 적용되는 종량세
+  unit_amount     numeric,                       -- 단위당세액(종량세)
+  reference_price numeric,                       -- 기준가격
+  country_scope   text,                          -- 적용국가구분: 1=전체, 2=일부
+  usage_type      text,                          -- 용도세율구분
+  effective_from  date,
+  effective_to    date,
+  raw             jsonb not null,
+  synced_at       timestamptz not null default now(),
+  unique (hs_code, rate_type, effective_from)
+);
+create index if not exists idx_tariff_hs on tariff_rates (hs_code);
+alter table tariff_rates enable row level security;
+create policy "public read" on tariff_rates for select using (true);
+
+-- =====================================================================
 -- subscriptions: Pro 티어 워치리스트 (Stripe 연동은 후순위)
 -- =====================================================================
 create table if not exists subscriptions (

@@ -8,6 +8,7 @@
     "sync:recalls": "node jobs/sync_recalls.js",
     "sync:laws": "node jobs/sync_law_updates.js",
     "sync:hscodes": "node jobs/sync_hs_codes.js",
+    "sync:tariff": "node jobs/sync_tariff_rates.js",
     "sync:all": "npm run sync:requirements && npm run sync:rejections && npm run sync:recalls && npm run sync:laws"
   },
   "dependencies": {

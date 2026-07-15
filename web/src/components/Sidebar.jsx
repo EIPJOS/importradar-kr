@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // 포켓커스텀 사이드바 구조를 그대로 따르되, 아직 없는 기능은 "준비중"으로
-// 정직하게 표시한다(가짜로 작동하는 척하지 않음). "홈"과 "분류표 보기"가 실제 작동한다.
+// 정직하게 표시한다(가짜로 작동하는 척하지 않음). soon:false인 항목만 실제 작동한다.
 const NAV_GROUPS = [
   {
     label: "HS CODE",
@@ -14,7 +14,7 @@ const NAV_GROUPS = [
   {
     label: "도구",
     items: [
-      { label: "수입 관부가세 계산기", soon: true },
+      { label: "수입 관부가세 계산기", soon: false, id: "calc" },
       { label: "KC 인증대상 확인", soon: true },
     ],
   },
