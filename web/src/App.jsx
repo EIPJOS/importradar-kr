@@ -8,6 +8,7 @@ import OneQ from "./components/OneQ.jsx";
 import DutyCalculator from "./components/DutyCalculator.jsx";
 import KcCertCheck from "./components/KcCertCheck.jsx";
 import FoodTypeCheck from "./components/FoodTypeCheck.jsx";
+import InspectionCostCheck from "./components/InspectionCostCheck.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -128,6 +129,12 @@ export default function App() {
         {view === "foodtype" && (
           <div className="browse-page">
             <FoodTypeCheck />
+          </div>
+        )}
+
+        {view === "inspectioncost" && (
+          <div className="browse-page">
+            <InspectionCostCheck />
           </div>
         )}
 

@@ -137,6 +137,40 @@ export async function browseFoodTypes() {
   return [...groups.entries()].map(([major, items]) => ({ major, items }));
 }
 
+// 정밀검사 예상비용 조회 (경쟁사 화면에서 수집한 스냅샷, pipeline/jobs/sync_inspection_costs.js로
+// 적재한 inspection_costs 테이블). category는 'food'(가공식품) 또는 'container'(기구·용기등).
+export async function browseInspectionCosts(category) {
+  const { data, error } = await supabase
+    .from("inspection_costs")
+    .select("id,major_category,mid_category,item_name,cost_krw")
+    .eq("category", category)
+    .order("major_category", { ascending: true })
+    .order("mid_category", { ascending: true })
+    .order("item_name", { ascending: true });
+  if (error) throw error;
+  const groups = new Map();
+  for (const row of data ?? []) {
+    const key = `${row.major_category}${row.mid_category}`;
+    if (!groups.has(key)) groups.set(key, { major: row.major_category, mid: row.mid_category, items: [] });
+    groups.get(key).items.push(row);
+  }
+  return [...groups.values()];
+}
+
+export async function searchInspectionCosts(query, category) {
+  const q = query.trim();
+  if (!q) return [];
+  let builder = supabase
+    .from("inspection_costs")
+    .select("id,category,major_category,mid_category,item_name,cost_krw")
+    .ilike("item_name", `%${q}%`)
+    .limit(50);
+  if (category) builder = builder.eq("category", category);
+  const { data, error } = await builder;
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getTariffRates(hsCode) {
   const hs = hsCode.replace(/\D/g, "");
   const { data, error } = await supabase
