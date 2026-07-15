@@ -77,7 +77,7 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <div className="sidebar-brand">
           <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
-          <span>수입레이더</span>
+          <span>통관메이트</span>
         </div>
 
         <nav className="sidebar-nav">
