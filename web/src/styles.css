@@ -1,6 +1,6 @@
 /* 수입레이더 — 관보(官報)·통관도장 모티프는 유지하되, 둥근 모서리·부드러운 그림자·
    자연스러운 트랜지션으로 톤을 현대적이고 친근하게 리프레시.
-   Noto Serif KR(제목) + Pretendard 자체호스팅(본문) + IBM Plex Mono(코드/숫자). */
+   전체 서체를 Pretendard 자체호스팅으로 통일(이전: 제목 Noto Serif KR, 코드/숫자 IBM Plex Mono). */
 
 @font-face {
   font-family: "Pretendard";
@@ -41,9 +41,9 @@
   --ok-soft: #e3ede6;
   --teal: #1f6f78;
   --teal-soft: #e2eeee;
-  --serif: "Noto Serif KR", serif;
+  --serif: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  --mono: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --sidebar-w: 264px;
   --radius-sm: 8px;
   --radius: 12px;
