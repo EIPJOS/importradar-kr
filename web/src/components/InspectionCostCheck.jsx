@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { browseInspectionCosts, searchInspectionCosts } from "../lib/supabase.js";
+import { browseInspectionItems, searchInspectionItems } from "../lib/supabase.js";
 
 const CATEGORY_LABEL = { food: "가공식품", container: "기구·용기등" };
-const won = (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`;
+const CATEGORY_RANGE = {
+  food: "통상 30만원~150만원 수준 (검사항목이 많은 특수영양식품·다류 등은 더 높을 수 있음)",
+  container: "통상 10만원~60만원 수준 (재질·부품 수에 따라 달라짐)",
+};
 
 export default function InspectionCostCheck() {
   const [category, setCategory] = useState("food");
@@ -12,14 +15,15 @@ export default function InspectionCostCheck() {
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     setGroups(null);
     setOpenKey(null);
     setSearchResults(null);
+    setSelected(null);
     setQ("");
-    browseInspectionCosts(category)
+    browseInspectionItems(category)
       .then(setGroups)
       .catch((err) => setError(err.message));
   }, [category]);
@@ -30,8 +34,9 @@ export default function InspectionCostCheck() {
     if (!query) return;
     setLoading(true);
     setError(null);
+    setSelected(null);
     try {
-      setSearchResults(await searchInspectionCosts(query, category));
+      setSearchResults(await searchInspectionItems(query, category));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -39,26 +44,16 @@ export default function InspectionCostCheck() {
     }
   }
 
-  function addItem(row) {
-    setSelected((prev) => (prev.some((r) => r.id === row.id) ? prev : [...prev, row]));
-  }
-
-  function removeItem(id) {
-    setSelected((prev) => prev.filter((r) => r.id !== id));
-  }
-
-  const total = selected.reduce((sum, r) => sum + r.cost_krw, 0);
-
   return (
     <section className="classify">
       <div className="browser-head">
         <h2>정밀검사비용 확인</h2>
-        <span className="browser-count">식품유형·재질별 정밀검사 예상비용 · 224개 항목</span>
+        <span className="browser-count">식품유형·재질별 정밀검사 대상 안내 · 224개 품목</span>
       </div>
       <p className="classify-note">
-        식품유형 또는 기구·용기 재질을 선택하면 정밀검사 예상비용을 확인할 수 있습니다. 여러 항목을
-        추가하면 합산 비용이 계산됩니다. 실제 검사비용은 검사기관에 따라 달라질 수 있으니
-        참고용으로만 사용하세요.
+        정밀검사 수수료는 관세청·식약처가 고시하는 법정 금액이 아니라 지정시험검사기관이 개별
+        산정하는 값입니다. 아래에서 식품유형 또는 기구·용기 재질을 확인하고, 일반적인 비용 범위를
+        참고한 뒤 정확한 견적은 지정시험검사기관에 직접 문의하세요.
       </p>
 
       <div className="chip-row">
@@ -93,10 +88,7 @@ export default function InspectionCostCheck() {
         <div className="classify-results">
           <p className="classify-note">검색 결과 {searchResults.length}건</p>
           {searchResults.map((r) => (
-            <article key={r.id} className="classify-card" onClick={() => addItem(r)} style={{ cursor: "pointer" }}>
-              <div className="card-head">
-                <span className="badge confidence-high">{won(r.cost_krw)}</span>
-              </div>
+            <article key={r.id} className="classify-card" onClick={() => setSelected(r)} style={{ cursor: "pointer" }}>
               <h3>{r.item_name}</h3>
               <p className="meta">
                 {r.major_category}
@@ -136,49 +128,39 @@ export default function InspectionCostCheck() {
                 <article
                   key={item.id}
                   className="classify-card"
-                  onClick={() => addItem(item)}
+                  onClick={() => setSelected(item)}
                   style={{ cursor: "pointer" }}
                 >
-                  <div className="card-head">
-                    <span className="badge confidence-high">{won(item.cost_krw)}</span>
-                  </div>
                   <h3>{item.item_name}</h3>
                 </article>
               ))}
             </div>
           ))}
 
-      {selected.length > 0 && (
+      {selected && (
         <div className="classify-results">
-          <p className="classify-note">선택한 항목 ({selected.length}건)</p>
-          <table>
-            <tbody>
-              {selected.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.item_name}</td>
-                  <td className="num">{won(r.cost_krw)}</td>
-                  <td>
-                    <button type="button" className="demo-link" onClick={() => removeItem(r.id)}>
-                      삭제
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              <tr>
-                <td>
-                  <strong>총 예상 비용</strong>
-                </td>
-                <td className="num">
-                  <strong>{won(total)}</strong>
-                </td>
-                <td />
-              </tr>
-            </tbody>
-          </table>
-          <p className="meta">
-            포함된 원재료 또는 제조공정에 따라 검사항목이 추가되거나 삭제될 수 있습니다. 실제 검사비용은
-            검사기관에 따라 달라질 수 있으니 예상 비용으로만 참고하시기 바랍니다.
-          </p>
+          <article className="classify-card">
+            <div className="card-head">
+              <span className="badge confidence-medium">정밀검사 대상</span>
+            </div>
+            <h3>{selected.item_name}</h3>
+            <p className="meta">
+              {selected.major_category}
+              {selected.mid_category !== selected.major_category ? ` › ${selected.mid_category}` : ""}
+            </p>
+            <p className="reason">일반적인 비용 범위: {CATEGORY_RANGE[category]}</p>
+            <p className="meta">
+              정확한 검사항목과 견적은 아래 식품안전나라 검사기관별 시험항목 검색에서 확인하세요.
+            </p>
+            <a
+              className="demo-link"
+              href="https://www.foodsafetykorea.go.kr/portal/specialinfo/examFeeList.do"
+              target="_blank"
+              rel="noreferrer"
+            >
+              지정시험검사기관 검색 →
+            </a>
+          </article>
         </div>
       )}
     </section>

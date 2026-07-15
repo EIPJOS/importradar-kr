@@ -11,4 +11,4 @@ pipeline/data/*
 # KC 카테고리 스냅샷은 예외: WAF 때문에 서버에서 재수집이 불가능해서 재현 불가능한 입력 데이터임
 !pipeline/data/kc_categories_*.json
 !pipeline/data/food_types_*.json
-!pipeline/data/inspection_costs_*.json
+!pipeline/data/inspection_items_*.json

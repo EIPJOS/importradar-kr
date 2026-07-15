@@ -137,12 +137,15 @@ export async function browseFoodTypes() {
   return [...groups.entries()].map(([major, items]) => ({ major, items }));
 }
 
-// 정밀검사 예상비용 조회 (경쟁사 화면에서 수집한 스냅샷, pipeline/jobs/sync_inspection_costs.js로
-// 적재한 inspection_costs 테이블). category는 'food'(가공식품) 또는 'container'(기구·용기등).
-export async function browseInspectionCosts(category) {
+// 정밀검사 대상 품목 분류 조회 (식품공전·기구용기포장 기준규격 분류명 스냅샷,
+// pipeline/jobs/sync_inspection_items.js로 적재한 inspection_costs 테이블).
+// category는 'food'(가공식품) 또는 'container'(기구·용기등). 비용 수치는 담지 않는다 —
+// 정밀검사 수수료는 법정 고시가 아니라 지정시험검사기관이 개별 산정하는 값이라
+// 이 표는 "검사대상 품목 안내"용으로만 쓴다.
+export async function browseInspectionItems(category) {
   const { data, error } = await supabase
     .from("inspection_costs")
-    .select("id,major_category,mid_category,item_name,cost_krw")
+    .select("id,major_category,mid_category,item_name")
     .eq("category", category)
     .order("major_category", { ascending: true })
     .order("mid_category", { ascending: true })
@@ -157,12 +160,12 @@ export async function browseInspectionCosts(category) {
   return [...groups.values()];
 }
 
-export async function searchInspectionCosts(query, category) {
+export async function searchInspectionItems(query, category) {
   const q = query.trim();
   if (!q) return [];
   let builder = supabase
     .from("inspection_costs")
-    .select("id,category,major_category,mid_category,item_name,cost_krw")
+    .select("id,category,major_category,mid_category,item_name")
     .ilike("item_name", `%${q}%`)
     .limit(50);
   if (category) builder = builder.eq("category", category);
