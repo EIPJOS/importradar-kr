@@ -10,6 +10,7 @@
     "sync:hscodes": "node jobs/sync_hs_codes.js",
     "sync:tariff": "node jobs/sync_tariff_rates.js",
     "sync:kc": "node jobs/sync_kc_categories.js",
+    "sync:foodtypes": "node jobs/sync_food_types.js",
     "sync:all": "npm run sync:requirements && npm run sync:rejections && npm run sync:recalls && npm run sync:laws"
   },
   "dependencies": {

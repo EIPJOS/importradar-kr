@@ -7,6 +7,7 @@ import QuickClassify from "./components/QuickClassify.jsx";
 import OneQ from "./components/OneQ.jsx";
 import DutyCalculator from "./components/DutyCalculator.jsx";
 import KcCertCheck from "./components/KcCertCheck.jsx";
+import FoodTypeCheck from "./components/FoodTypeCheck.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -121,6 +122,12 @@ export default function App() {
         {view === "kc" && (
           <div className="browse-page">
             <KcCertCheck />
+          </div>
+        )}
+
+        {view === "foodtype" && (
+          <div className="browse-page">
+            <FoodTypeCheck />
           </div>
         )}
 
