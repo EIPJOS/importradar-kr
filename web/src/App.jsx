@@ -11,6 +11,7 @@ import FoodTypeCheck from "./components/FoodTypeCheck.jsx";
 import InspectionCostCheck from "./components/InspectionCostCheck.jsx";
 import NutritionRequirementCheck from "./components/NutritionRequirementCheck.jsx";
 import NutritionPercentCalc from "./components/NutritionPercentCalc.jsx";
+import QuarantineRequestForm from "./components/QuarantineRequestForm.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -149,6 +150,12 @@ export default function App() {
         {view === "nutritionpct" && (
           <div className="browse-page">
             <NutritionPercentCalc />
+          </div>
+        )}
+
+        {view === "quarantine" && (
+          <div className="browse-page">
+            <QuarantineRequestForm />
           </div>
         )}
 

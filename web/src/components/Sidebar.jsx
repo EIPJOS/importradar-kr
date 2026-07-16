@@ -29,7 +29,7 @@ const NAV_GROUPS = [
   },
   {
     label: "수입식품 검역 의뢰",
-    items: [{ label: "가공식품 의뢰", soon: true }],
+    items: [{ label: "가공식품 의뢰", soon: false, id: "quarantine" }],
   },
 ];
 
