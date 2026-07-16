@@ -83,6 +83,34 @@ export async function browseHsCodes(q) {
   return data ?? [];
 }
 
+// 류(2자리 chapter)별 HS코드 건수. 부→류 탐색 화면에서 "N건" 뱃지로 쓴다.
+export async function getChapterCounts() {
+  const { data, error } = await supabase.rpc("hs_chapter_counts");
+  if (error) throw error;
+  return new Map((data ?? []).map((r) => [r.chapter, r.n]));
+}
+
+// 특정 류(chapter) 안에서 검색어(선택)로 좁힌 HS코드 목록.
+export async function browseHsCodesInChapter(chapter, q) {
+  const query = q.trim();
+  let builder = supabase
+    .from("hs_codes")
+    .select("hs_code,name_ko,name_en")
+    .eq("country_code", "KR")
+    .eq("chapter", chapter);
+  if (query) {
+    const digits = query.replace(/\D/g, "");
+    if (digits && digits === query) {
+      builder = builder.like("hs_code", `${digits}%`);
+    } else {
+      builder = builder.or(`name_ko.ilike.%${query}%,name_en.ilike.%${query}%`);
+    }
+  }
+  const { data, error } = await builder.order("hs_code", { ascending: true }).limit(120);
+  if (error) throw error;
+  return data ?? [];
+}
+
 // HS코드의 관세율 후보 전체(기본세율/WTO협정세율/FTA국가별세율)를 가져온다.
 // 관세청_품목번호별 관세율표(data.go.kr 15051179, 연 1회 갱신 XLSX)를
 // pipeline/jobs/sync_tariff_rates.js로 적재한 tariff_rates 테이블에서 조회.
