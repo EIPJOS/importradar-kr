@@ -10,6 +10,7 @@ import KcCertCheck from "./components/KcCertCheck.jsx";
 import FoodTypeCheck from "./components/FoodTypeCheck.jsx";
 import InspectionCostCheck from "./components/InspectionCostCheck.jsx";
 import NutritionRequirementCheck from "./components/NutritionRequirementCheck.jsx";
+import NutritionPercentCalc from "./components/NutritionPercentCalc.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -142,6 +143,12 @@ export default function App() {
         {view === "nutritionreq" && (
           <div className="browse-page">
             <NutritionRequirementCheck />
+          </div>
+        )}
+
+        {view === "nutritionpct" && (
+          <div className="browse-page">
+            <NutritionPercentCalc />
           </div>
         )}
 

@@ -24,7 +24,7 @@ const NAV_GROUPS = [
       { label: "식품유형 확인", soon: false, id: "foodtype" },
       { label: "정밀검사비용 확인", soon: false, id: "inspectioncost" },
       { label: "영양성분 입력대상 확인", soon: false, id: "nutritionreq" },
-      { label: "영양성분 퍼센트 계산", soon: true },
+      { label: "영양성분 퍼센트 계산", soon: false, id: "nutritionpct" },
     ],
   },
   {
