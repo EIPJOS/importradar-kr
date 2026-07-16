@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { supabase } from "../lib/supabase.js";
+import { supabase, getTariffRates, fetchLiveRequirements } from "../lib/supabase.js";
+import { ORIGINS } from "../lib/tariffRateSelect.js";
 
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hs-classify`;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+const RATE_LABELS = {
+  A: "기본",
+  C: "WTO",
+  FCN1: "한중FTA",
+  FUS1: "한미FTA",
+  FEU1: "한EU FTA",
+  FVN1: "한베트남FTA",
+  FAS1: "한아세안FTA",
+  FRCJP1: "RCEP(한일)",
+};
+
 const PAIN_POINTS = [
   {
     title: "모호한 제품명",
-    body: "고객은 \u201c이어폰\u201d, \u201c히터\u201d, \u201c컵\u201d처럼 짧게만 적습니다. 그 한 단어로 카테고리를 직접 고르게 하면, 잘못된 선택이 그대로 신고로 이어집니다.",
+    body: "고객은 “이어폰”, “히터”, “컵”처럼 짧게만 적습니다. 그 한 단어로 카테고리를 직접 고르게 하면, 잘못된 선택이 그대로 신고로 이어집니다.",
   },
   {
     title: "카테고리 오선택 → 분류 오류",
@@ -19,7 +31,18 @@ const PAIN_POINTS = [
   },
 ];
 
+const STATS = [
+  { value: "12,469건", label: "HS코드 마스터(관세청)" },
+  { value: "75,574건", label: "관세율 데이터(기본·WTO·FTA 6종)" },
+  { value: "무제한", label: "무료 · 로그인 불필요" },
+  { value: "실시간", label: "세관장확인 요건 연동" },
+];
+
 const FAQS = [
+  {
+    q: "confirmed와 provisional은 뭐가 다른가요?",
+    a: "후보가 뚜렷하게 하나로 좁혀지면 confirmed(확정), “히터”처럼 재질·용도에 따라 다른 코드로 갈릴 수 있는 동명이물이면 provisional(잠정) + 확인 질문을 함께 드립니다. 잠정 배지일 때는 재질/용도를 채워 재조회하면 확정을 시도합니다.",
+  },
   {
     q: "AI 분류와 실제 신고가 다를 수 있나요?",
     a: "네, 참고용입니다. 원큐는 관세청 공공데이터(HS코드 마스터 12,469건)에서 후보를 찾고 AI가 그 안에서 선택하는 방식이라 실존하지 않는 코드는 나오지 않지만, 관세사 실제 신고 이력으로 검증된 확정치는 아닙니다. 최종 신고 전 관세사 확인을 권장합니다.",
@@ -29,20 +52,36 @@ const FAQS = [
     a: "지금은 웹 데모로 먼저 제공하고 있습니다. 배대지·포워더 시스템에 API로 직접 연동하고 싶으시면 아래 문의 폼으로 남겨주세요.",
   },
   {
-    q: "데이터는 어디서 오나요?",
-    a: "관세청 세관장확인대상물품, HS코드 마스터, 식약처 수입식품 부적합·회수, 법제처 국가법령정보를 매일/매주 자동 수집하고, 여기에 Claude AI 분류 로직을 결합합니다.",
+    q: "세율과 수입요건도 같이 오나요?",
+    a: "네. HS코드 후보마다 원산지 기준 관세율(기본·WTO·FTA)과 세관장확인 수입요건을 같은 응답에 함께 반환합니다.",
   },
   {
-    q: "비용은 어떻게 되나요?",
-    a: "현재는 무료로 제공 중입니다. B2B API 연동은 별도 협의가 필요하며, 아래 문의 폼으로 연락 주시면 안내드립니다.",
+    q: "데이터는 어디서 오나요?",
+    a: "관세청 세관장확인대상물품, HS코드 마스터, 품목번호별 관세율표, 식약처 수입식품 부적합·회수, 법제처 국가법령정보를 매일/매주 자동 수집하고, 여기에 Claude AI 분류 로직을 결합합니다.",
   },
 ];
 
+async function classify(body) {
+  const res = await fetch(FUNCTIONS_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json", apikey: ANON_KEY },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "요청 실패");
+  return data;
+}
+
 export default function OneQ({ onSelect }) {
   const [productName, setProductName] = useState("");
+  const [material, setMaterial] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [country, setCountry] = useState("중국");
   const [loading, setLoading] = useState(false);
   const [demoResult, setDemoResult] = useState(null);
   const [demoError, setDemoError] = useState(null);
+  const [extra, setExtra] = useState(null); // { rates, requirements }
+  const [answer, setAnswer] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
 
   const [form, setForm] = useState({ name: "", contact: "", email: "", message: "" });
@@ -54,15 +93,50 @@ export default function OneQ({ onSelect }) {
     setLoading(true);
     setDemoError(null);
     setDemoResult(null);
+    setExtra(null);
+    setAnswer("");
     try {
-      const res = await fetch(FUNCTIONS_URL, {
-        method: "POST",
-        headers: { "content-type": "application/json", apikey: ANON_KEY },
-        body: JSON.stringify({ productName, originCountry: "미상", language: "ko" }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "요청 실패");
+      const data = await classify({ productName, originCountry: country, language: "ko", material, purpose });
       setDemoResult(data);
+      const top = data.results?.[0];
+      if (top) {
+        const [rates, requirements] = await Promise.all([
+          getTariffRates(top.hs_code).catch(() => []),
+          fetchLiveRequirements(top.hs_code).catch(() => null),
+        ]);
+        setExtra({ rates, requirements: requirements?.requirements ?? [] });
+      }
+    } catch (err) {
+      setDemoError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function reclassifyWithAnswer(e) {
+    e.preventDefault();
+    if (!answer.trim()) return;
+    setLoading(true);
+    setDemoError(null);
+    try {
+      // 되묻는 질문이 재질/용도 중 어느 쪽이었는지 모르니 둘 다에 채워 넣는다 —
+      // 프롬프트가 실제로 필요한 쪽만 참고하므로 결과에는 영향 없다.
+      const data = await classify({
+        productName,
+        originCountry: country,
+        language: "ko",
+        material: material || answer,
+        purpose: purpose || answer,
+      });
+      setDemoResult(data);
+      const top = data.results?.[0];
+      if (top) {
+        const [rates, requirements] = await Promise.all([
+          getTariffRates(top.hs_code).catch(() => []),
+          fetchLiveRequirements(top.hs_code).catch(() => null),
+        ]);
+        setExtra({ rates, requirements: requirements?.requirements ?? [] });
+      }
     } catch (err) {
       setDemoError(err.message);
     } finally {
@@ -84,14 +158,15 @@ export default function OneQ({ onSelect }) {
   }
 
   const topPick = demoResult?.results?.[0];
+  const isProvisional = demoResult?.status === "provisional";
 
   return (
     <section className="oneq">
       <div className="oneq-eyebrow">B2B 연동 · 배대지/포워더 전용 (준비 중)</div>
       <h1 className="oneq-title">카테고리 선택 없이, 제품명 하나로 끝내세요</h1>
       <p className="oneq-sub">
-        원큐(One Queue) API 한 번이면 HS코드 후보와 수입요건까지 한 번에 돌아옵니다.
-        고객이 카테고리를 직접 고르다가 오분류로 이어지는 문제를 없애는 게 목표입니다.
+        원큐(One Queue) API 한 번이면 HS코드 후보와 관세율, 수입요건까지 한 번에 돌아옵니다.
+        애매한 품명은 카테고리 목록 대신 속성 1개만 되물어 확정을 시도합니다.
       </p>
 
       <div className="oneq-pain-grid">
@@ -109,51 +184,137 @@ export default function OneQ({ onSelect }) {
       {/* ── 실제 작동하는 데모 (hs-classify 엔진 재사용) ── */}
       <div className="oneq-demo">
         <h2>지금 바로 테스트해보기</h2>
-        <p className="classify-note">
-          아래는 실제로 작동하는 데모입니다 — "빠른 HS CODE 분류"와 같은 엔진을 씁니다.
-          관세율 조회는 아직 준비 중이라 이번 데모에는 포함되지 않습니다.
-        </p>
-        <form className="oneq-demo-form" onSubmit={runDemo}>
-          <input
-            className="browser-search"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            placeholder="예: 무선 이어폰(블루투스)"
-          />
-          <button className="classify-submit" type="submit" disabled={loading}>
-            {loading ? "요청 중…" : "API 요청 보내기"}
-          </button>
-        </form>
+        <p className="classify-note">아래는 실제로 작동하는 데모입니다 — API 요청 한 번으로 HS코드·관세율·수입요건이 함께 돌아옵니다.</p>
 
-        {demoError && <p className="error">{demoError}</p>}
+        <div className="classify-split">
+          <div className="classify-col-form">
+            <form className="classify-form" onSubmit={runDemo}>
+              <label className="classify-label">제품명 *</label>
+              <input
+                className="browser-search"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="예: 히터, 무선 이어폰(블루투스)"
+              />
+              <label className="classify-label">재질 (선택)</label>
+              <input className="browser-search" value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="예: 플라스틱, 세라믹" />
+              <label className="classify-label">용도 (선택)</label>
+              <input className="browser-search" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="예: 가정용 실내난방, 산업용 설비" />
+              <label className="classify-label">원산지 국가</label>
+              <div className="chip-row">
+                {ORIGINS.map((c) => (
+                  <button type="button" key={c} className={`chip ${country === c ? "on" : ""}`} onClick={() => setCountry(c)}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <button className="classify-submit" type="submit" disabled={loading}>
+                {loading ? "요청 중…" : "API 요청 보내기"}
+              </button>
+            </form>
+            {demoError && <p className="error">{demoError}</p>}
+          </div>
 
-        {demoResult && (
-          <div className="oneq-demo-result">
-            {topPick ? (
-              <>
+          <div className="classify-col-results">
+            {!demoResult && !loading && (
+              <div className="classify-empty-panel">
+                <span className="icon">📡</span>
+                <span>제품명을 입력하고 API 요청을 보내주세요</span>
+              </div>
+            )}
+            {loading && (
+              <div className="classify-empty-panel">
+                <span className="icon">⏳</span>
+                <span>약 10초 내에 응답이 옵니다…</span>
+              </div>
+            )}
+
+            {demoResult && topPick && (
+              <div className="classify-card">
                 <div className="card-head">
                   <span className="demo-hs">{topPick.hs_code}</span>
-                  <span className={`badge confidence-${topPick.confidence}`}>신뢰도 {topPick.confidence}</span>
+                  <span className={`badge ${isProvisional ? "confidence-medium" : "confidence-high"}`}>
+                    {isProvisional ? "잠정 (provisional)" : "확정 (confirmed)"}
+                  </span>
                 </div>
                 <h3>{topPick.name_ko}</h3>
                 <p className="meta">{topPick.name_en}</p>
                 {topPick.reasoning && <p className="reason">{topPick.reasoning}</p>}
+
+                {isProvisional && demoResult.clarifying_question && (
+                  <div className="req-detail" style={{ marginTop: 10 }}>
+                    <p>
+                      <strong>확정하려면 한 가지만 더 알려주세요</strong>
+                    </p>
+                    <p className="reason">{demoResult.clarifying_question}</p>
+                    <form onSubmit={reclassifyWithAnswer} className="chip-row" style={{ marginTop: 8 }}>
+                      <input
+                        className="browser-search"
+                        style={{ flex: 1 }}
+                        value={answer}
+                        onChange={(e) => setAnswer(e.target.value)}
+                        placeholder="답변을 입력하세요"
+                      />
+                      <button className="classify-submit" type="submit" disabled={loading} style={{ width: "auto", padding: "0 16px" }}>
+                        재조회
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {extra && (
+                  <>
+                    {extra.rates.length > 0 ? (
+                      <div className="chip-row" style={{ marginTop: 10 }}>
+                        {extra.rates
+                          .filter((r) => RATE_LABELS[r.rate_type] && r.rate_percent != null)
+                          .map((r) => (
+                            <span key={r.rate_type} className="chip">
+                              {RATE_LABELS[r.rate_type]} {r.rate_percent}%
+                            </span>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="meta" style={{ marginTop: 10 }}>
+                        등록된 관세율 정보 없음
+                      </p>
+                    )}
+                    {extra.requirements.length > 0 ? (
+                      <p className="reason" style={{ marginTop: 8 }}>
+                        수입요건 {extra.requirements.length}건: {extra.requirements.map((req) => req.law_name).filter(Boolean).join(", ")}
+                      </p>
+                    ) : (
+                      <p className="meta" style={{ marginTop: 8 }}>
+                        등록된 세관장확인 요건 없음
+                      </p>
+                    )}
+                  </>
+                )}
+
                 <button className="demo-link" onClick={() => onSelect(topPick.hs_code)}>
-                  이 코드로 수입요건 조회 →
+                  이 코드로 수입요건 전체보기 →
                 </button>
-              </>
-            ) : (
-              <p className="empty">{demoResult.note ?? "일치하는 분류를 찾지 못했습니다."}</p>
+              </div>
+            )}
+
+            {demoResult && !topPick && (
+              <div className="classify-empty-panel">
+                <span className="icon">🔍</span>
+                <span>{demoResult.note ?? "일치하는 분류를 찾지 못했습니다."}</span>
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── 신뢰 지표 (실제 수치만) ── */}
       <div className="oneq-stats">
-        <div className="oneq-stat"><strong>12,469건</strong><span>HS코드 마스터(관세청)</span></div>
-        <div className="oneq-stat"><strong>1,425건</strong><span>부적합·회수 이력 자동 반영</span></div>
-        <div className="oneq-stat"><strong>AI 참고용</strong><span>관세사 확인 권장</span></div>
+        {STATS.map((s) => (
+          <div className="oneq-stat" key={s.label}>
+            <strong>{s.value}</strong>
+            <span>{s.label}</span>
+          </div>
+        ))}
       </div>
       <p className="oneq-honesty-note">
         이 분류는 관세청 공공데이터와 AI 추론으로 생성되며, 실제 관세사 신고 이력으로 검증된 확정치가 아닙니다.
