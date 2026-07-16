@@ -560,6 +560,26 @@ time { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); font-v
 .badge.confidence-medium { background: var(--brass-soft); color: var(--brass); }
 .badge.confidence-low { background: var(--seal-soft); color: var(--seal); }
 
+/* 2단 레이아웃(입력 왼쪽 · 결과 오른쪽) — QuickClassify 등에서 사용 */
+.classify-split { display: flex; gap: 28px; align-items: flex-start; }
+.classify-split .classify-col-form { flex: 1; min-width: 0; max-width: 480px; }
+.classify-split .classify-col-results { flex: 1; min-width: 0; }
+.classify-empty-panel {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  min-height: 260px; border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  background: var(--paper-raised); color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 24px;
+}
+.classify-empty-panel .icon { font-size: 28px; opacity: 0.5; }
+.req-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.req-chip { font-size: 12px; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--line); background: var(--paper); cursor: pointer; color: var(--ink-soft); }
+.req-chip:hover, .req-chip.on { border-color: var(--teal); color: var(--teal); background: var(--teal-soft); }
+.req-detail { margin-top: 8px; padding: 10px 12px; background: var(--paper); border-radius: var(--radius-sm); font-size: 12.5px; }
+
+@media (max-width: 860px) {
+  .classify-split { flex-direction: column; }
+  .classify-split .classify-col-form, .classify-split .classify-col-results { max-width: none; }
+}
+
 /* ── 원큐 (One Queue) B2B 페이지 ── */
 .oneq { max-width: 760px; }
 .oneq-eyebrow {
