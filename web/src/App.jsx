@@ -9,6 +9,7 @@ import DutyCalculator from "./components/DutyCalculator.jsx";
 import KcCertCheck from "./components/KcCertCheck.jsx";
 import FoodTypeCheck from "./components/FoodTypeCheck.jsx";
 import InspectionCostCheck from "./components/InspectionCostCheck.jsx";
+import NutritionRequirementCheck from "./components/NutritionRequirementCheck.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
@@ -135,6 +136,12 @@ export default function App() {
         {view === "inspectioncost" && (
           <div className="browse-page">
             <InspectionCostCheck />
+          </div>
+        )}
+
+        {view === "nutritionreq" && (
+          <div className="browse-page">
+            <NutritionRequirementCheck />
           </div>
         )}
 
