@@ -1,18 +1,6 @@
 import React, { useState } from "react";
 import { getTariffRates } from "../lib/supabase.js";
-
-// 원산지 선택 -> FTA 협정세율구분 코드 매핑 (관세청_품목번호별 관세율표 rate_type)
-// FCN1=한중FTA, FUS1=한미FTA, FEU1=한EU FTA, FVN1=한베트남FTA, FAS1=한아세안FTA, FRCJP1=RCEP 한일
-const ORIGIN_RATE_TYPE = {
-  중국: "FCN1",
-  미국: "FUS1",
-  일본: "FRCJP1",
-  EU: "FEU1",
-  베트남: "FVN1",
-  아세안: "FAS1",
-  기타: null,
-};
-const ORIGINS = Object.keys(ORIGIN_RATE_TYPE);
+import { ORIGINS, selectApplicableRate } from "../lib/tariffRateSelect.js";
 
 const won = (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`;
 
@@ -48,19 +36,12 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
         return;
       }
 
-      const ftaType = ORIGIN_RATE_TYPE[origin];
-      const ftaRow = ftaType ? rates.find((r) => r.rate_type === ftaType) : null;
-      const basicRow = rates.find((r) => r.rate_type === "A");
-      const wtoRow = rates.find((r) => r.rate_type === "C");
-
-      // 실제 적용세율: FTA 원산지증명이 있다는 전제로 협정세율을 우선하되,
-      // WTO/기본세율보다 협정세율이 오히려 높으면(드물게 존재) 더 낮은 쪽을 채택한다.
-      const candidates = [ftaRow, wtoRow, basicRow].filter((r) => r && r.rate_percent != null);
-      if (candidates.length === 0) {
+      const applied = selectApplicableRate(rates, origin);
+      if (!applied) {
         setError("이 HS코드는 종량세 등 정률 계산이 어려운 품목입니다. 관세사 확인이 필요합니다.");
         return;
       }
-      const applied = candidates.reduce((min, r) => (r.rate_percent < min.rate_percent ? r : min));
+      const basicRow = rates.find((r) => r.rate_type === "A");
 
       const freightNum = Number(freight) || 0;
       const insuranceNum = Number(insurance) || 0;
@@ -73,9 +54,9 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
         hs,
         cif,
         appliedRate: applied.rate_percent,
-        appliedSource: applied === ftaRow ? `FTA(${origin})` : applied === wtoRow ? "WTO협정세율" : "기본세율",
+        appliedSource: applied.source,
         basicRate: basicRow?.rate_percent ?? null,
-        ftaAvailable: !!ftaRow,
+        ftaAvailable: applied.source.startsWith("FTA"),
         duty,
         vat,
         total,

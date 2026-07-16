@@ -9,7 +9,7 @@ const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/require
 
 // 검색어가 HS코드처럼 보이면(숫자 4자리 이상) 세관장확인요건을 실시간 조회+캐시하는
 // Edge Function을 호출한다. 실패해도 검색 자체는 계속 진행(요건 데이터만 비어있게 됨).
-async function fetchLiveRequirements(q) {
+export async function fetchLiveRequirements(q) {
   const digits = q.replace(/\D/g, "");
   if (digits.length < 4) return null;
   try {
