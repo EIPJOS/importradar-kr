@@ -159,30 +159,30 @@ export default function HsCodeBrowser({ onSelect }) {
         autoFocus
       />
 
-      <div className="classify-results" style={{ marginTop: 16 }}>
+      <div className="section-list" style={{ marginTop: 16 }}>
         {HS_SECTIONS.map((section) => (
-          <article key={section.no} className="classify-card">
-            <div
-              className="card-head"
-              style={{ cursor: "pointer" }}
+          <React.Fragment key={section.no}>
+            <button
+              type="button"
+              className="section-row"
               onClick={() => setOpenSection(openSection === section.no ? null : section.no)}
             >
-              <h3 style={{ margin: 0 }}>
-                제{section.no}부 {section.name}
-              </h3>
+              <span className="no">제{section.no}부</span>
+              <span className="name">{section.name}</span>
               <span className={`chevron ${openSection === section.no ? "open" : ""}`}>▾</span>
-            </div>
+            </button>
             {openSection === section.no && (
-              <div className="chip-row" style={{ marginTop: 10 }}>
+              <div className="chapter-sublist">
                 {section.chapters.map((c) => (
-                  <button type="button" key={c.no} className="chip" onClick={() => openChapter(c.no)}>
-                    제{Number(c.no)}류 {c.name.length > 20 ? c.name.slice(0, 20) + "…" : c.name}
-                    {chapterCounts?.get(c.no) ? ` (${chapterCounts.get(c.no)})` : ""}
+                  <button type="button" key={c.no} className="chapter-row" onClick={() => openChapter(c.no)}>
+                    <span className="no">{c.no}류</span>
+                    <span className="name">{c.name}</span>
+                    <span className="count">{chapterCounts?.get(c.no) ? `${chapterCounts.get(c.no)}건` : ""}</span>
                   </button>
                 ))}
               </div>
             )}
-          </article>
+          </React.Fragment>
         ))}
       </div>
 

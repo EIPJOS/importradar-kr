@@ -7,7 +7,7 @@ const NAV_GROUPS = [
     label: "HS CODE",
     items: [
       { label: "빠른 HS CODE 분류", soon: false, id: "classify" },
-      { label: "분류표 보기", soon: false, id: "browse" },
+      { label: "HS코드 분류표", soon: false, id: "browse" },
       { label: "원큐 (One Queue) - B2B API", soon: false, id: "oneq" },
     ],
   },
@@ -88,8 +88,8 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
             회사소개
           </button>
 
-          {NAV_GROUPS.map((g, i) => (
-            <NavGroup key={g.label} group={g} defaultOpen={i === 0} view={view} onNavigate={onNavigate} />
+          {NAV_GROUPS.map((g) => (
+            <NavGroup key={g.label} group={g} defaultOpen view={view} onNavigate={onNavigate} />
           ))}
         </nav>
 
