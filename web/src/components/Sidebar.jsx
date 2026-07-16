@@ -84,8 +84,8 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
           <button className={`nav-item top ${view === "home" ? "on" : ""}`} onClick={() => onNavigate("home")}>
             홈
           </button>
-          <button className="nav-item top soon" disabled title="준비 중인 기능입니다">
-            회사소개 <span className="soon-tag">준비중</span>
+          <button className={`nav-item top ${view === "about" ? "on" : ""}`} onClick={() => onNavigate("about")}>
+            회사소개
           </button>
 
           {NAV_GROUPS.map((g, i) => (
