@@ -163,7 +163,12 @@ export async function browseFoodTypes() {
     if (!groups.has(row.major_category)) groups.set(row.major_category, []);
     groups.get(row.major_category).push(row);
   }
-  return [...groups.entries()].map(([major, items]) => ({ major, items }));
+  // major_category는 "1. 과자류..." 처럼 번호가 붙어있는데 문자열 정렬(1,10,11..2,20..)이라
+  // 앞자리 숫자를 뽑아 숫자순으로 다시 정렬한다.
+  const numOf = (major) => parseInt(major.match(/^\d+/)?.[0] ?? "999", 10);
+  return [...groups.entries()]
+    .map(([major, items]) => ({ major, items }))
+    .sort((a, b) => numOf(a.major) - numOf(b.major));
 }
 
 // 정밀검사 대상 품목 분류 조회 (식품공전·기구용기포장 기준규격 분류명 스냅샷,
