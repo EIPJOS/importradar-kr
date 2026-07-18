@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { searchFoodTypes, browseFoodTypes } from "../lib/supabase.js";
+import { useT } from "../lib/i18n.jsx";
 
 const EXAMPLES = ["과자", "라면", "커피", "김치"];
 
 export default function FoodTypeCheck() {
+  const t = useT("foodType");
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,16 +56,15 @@ export default function FoodTypeCheck() {
   return (
     <section className="classify">
       <div className="browser-head">
-        <h2>식품유형 확인</h2>
-        <span className="browser-count">식품공전(식약처) 식품유형 분류표 · 272개 유형</span>
+        <h2>{t.heading}</h2>
+        <span className="browser-count">{t.subtitle}</span>
       </div>
       <p className="classify-note">
-        가공식품의 식품유형을 검색하거나 대분류에서 직접 선택해 확인하세요. 정확한 표시기준·규격은
-        식품의약품안전처 식품공전 원문 확인이 필요합니다.
+        {t.note}
       </p>
 
       <form className="classify-form" onSubmit={onSubmit}>
-        <label className="classify-label">식품유형 검색</label>
+        <label className="classify-label">{t.searchLabel}</label>
         <input
           className="browser-search"
           value={q}
@@ -78,7 +79,7 @@ export default function FoodTypeCheck() {
           ))}
         </div>
         <button className="classify-submit" type="submit" disabled={loading}>
-          {loading ? "검색 중…" : "검색"}
+          {loading ? t.searching : t.searchButton}
         </button>
       </form>
 
@@ -88,9 +89,9 @@ export default function FoodTypeCheck() {
         <div className="classify-results">
           <article className="classify-card">
             <div className="card-head">
-              <span className="badge confidence-high">선택한 식품유형</span>
+              <span className="badge confidence-high">{t.selectedBadge}</span>
               <button type="button" className="demo-link" onClick={() => setSelected(null)}>
-                초기화
+                {t.resetButton}
               </button>
             </div>
             <h3>{selected.sub_type}</h3>
@@ -103,7 +104,7 @@ export default function FoodTypeCheck() {
 
       {results && results.length > 0 && (
         <div className="classify-results">
-          <p className="classify-note">일치하는 식품유형 {results.length}건을 찾았습니다.</p>
+          <p className="classify-note">{t.matchCount(results.length)}</p>
           {results.map((r) => (
             <article key={r.id} className="classify-card" onClick={() => pickResult(r)} style={{ cursor: "pointer" }}>
               <h3>{r.sub_type}</h3>
@@ -114,12 +115,12 @@ export default function FoodTypeCheck() {
       )}
 
       {results && results.length === 0 && (
-        <p className="empty">일치하는 식품유형을 찾지 못했습니다. 아래에서 대분류를 직접 선택해 보세요.</p>
+        <p className="empty">{t.noMatch}</p>
       )}
 
       {!selected && groups && (
         <div className="classify-results">
-          <p className="classify-note">또는 대분류에서 직접 선택하세요</p>
+          <p className="classify-note">{t.orBrowse}</p>
           <div className="chip-row">
             {groups.map((g) => (
               <button

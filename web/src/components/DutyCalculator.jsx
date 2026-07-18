@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { getTariffRates } from "../lib/supabase.js";
 import { ORIGINS, selectApplicableRate } from "../lib/tariffRateSelect.js";
+import { useT } from "../lib/i18n.jsx";
 
 const won = (n) => `₩${Math.round(n).toLocaleString("ko-KR")}`;
 
 export default function DutyCalculator({ initialHsCode, onSelect }) {
+  const t = useT("dutyCalc");
   const [hsCode, setHsCode] = useState(initialHsCode ?? "");
   const [origin, setOrigin] = useState("중국");
   const [price, setPrice] = useState("");
@@ -19,11 +21,11 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
     const hs = hsCode.replace(/\D/g, "");
     const priceNum = Number(price);
     if (hs.length < 6) {
-      setError("HS코드를 6자리 이상 입력해주세요.");
+      setError(t.errHsLength);
       return;
     }
     if (!priceNum || priceNum <= 0) {
-      setError("물품가격을 입력해주세요.");
+      setError(t.errPrice);
       return;
     }
     setLoading(true);
@@ -32,13 +34,13 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
     try {
       const rates = await getTariffRates(hs);
       if (rates.length === 0) {
-        setError("등록된 관세율 정보를 찾을 수 없습니다. HS코드를 다시 확인해주세요.");
+        setError(t.errNoRates);
         return;
       }
 
       const applied = selectApplicableRate(rates, origin);
       if (!applied) {
-        setError("이 HS코드는 종량세 등 정률 계산이 어려운 품목입니다. 관세사 확인이 필요합니다.");
+        setError(t.errNotAdValorem);
         return;
       }
       const basicRow = rates.find((r) => r.rate_type === "A");
@@ -71,24 +73,21 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
   return (
     <section className="classify">
       <div className="browser-head">
-        <h2>수입 관부가세 계산기</h2>
-        <span className="browser-count">관세청 관세율표 기준 · 참고용</span>
+        <h2>{t.title}</h2>
+        <span className="browser-count">{t.subtitle}</span>
       </div>
-      <p className="classify-note">
-        HS코드와 물품가격을 입력하면 관세·부가가치세·총 수입비용을 계산해드립니다.
-        FTA 협정세율은 원산지증명서 구비를 전제로 적용됩니다.
-      </p>
+      <p className="classify-note">{t.description}</p>
 
       <form className="classify-form" onSubmit={onSubmit}>
-        <label className="classify-label">HS코드</label>
+        <label className="classify-label">{t.hsCodeLabel}</label>
         <input
           className="browser-search"
           value={hsCode}
           onChange={(e) => setHsCode(e.target.value)}
-          placeholder="예: 8517130000"
+          placeholder={t.hsCodePlaceholder}
         />
 
-        <label className="classify-label">원산지 국가</label>
+        <label className="classify-label">{t.originLabel}</label>
         <div className="chip-row">
           {ORIGINS.map((o) => (
             <button
@@ -102,17 +101,17 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
           ))}
         </div>
 
-        <label className="classify-label">물품가격 (KRW, FOB 기준)</label>
+        <label className="classify-label">{t.priceLabel}</label>
         <input
           className="browser-search"
           type="number"
           min="0"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          placeholder="예: 1000000"
+          placeholder={t.pricePlaceholder}
         />
 
-        <label className="classify-label">국제운임 (KRW)</label>
+        <label className="classify-label">{t.freightLabel}</label>
         <input
           className="browser-search"
           type="number"
@@ -121,7 +120,7 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
           onChange={(e) => setFreight(e.target.value)}
         />
 
-        <label className="classify-label">보험료 (KRW)</label>
+        <label className="classify-label">{t.insuranceLabel}</label>
         <input
           className="browser-search"
           type="number"
@@ -131,7 +130,7 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
         />
 
         <button className="classify-submit" type="submit" disabled={loading}>
-          {loading ? "계산 중…" : "세금 계산하기"}
+          {loading ? t.loadingLabel : t.submitLabel}
         </button>
       </form>
 
@@ -143,26 +142,26 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
             <div className="card-head">
               <span className="demo-hs">{result.hs}</span>
               <span className="badge confidence-high">
-                적용세율 {result.appliedRate}% ({result.appliedSource})
+                {t.appliedRateBadge(result.appliedRate, result.appliedSource)}
               </span>
             </div>
             <table>
               <tbody>
                 <tr>
-                  <td>CIF 가격</td>
+                  <td>{t.tdCif}</td>
                   <td className="num">{won(result.cif)}</td>
                 </tr>
                 <tr>
-                  <td>관세 ({result.appliedRate}%)</td>
+                  <td>{t.tdDuty(result.appliedRate)}</td>
                   <td className="num">{won(result.duty)}</td>
                 </tr>
                 <tr>
-                  <td>부가가치세 (10%)</td>
+                  <td>{t.tdVat}</td>
                   <td className="num">{won(result.vat)}</td>
                 </tr>
                 <tr>
                   <td>
-                    <strong>총 납부세액</strong>
+                    <strong>{t.tdTotalDuty}</strong>
                   </td>
                   <td className="num">
                     <strong>{won(result.duty + result.vat)}</strong>
@@ -170,7 +169,7 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
                 </tr>
                 <tr>
                   <td>
-                    <strong>최종 수입비용</strong>
+                    <strong>{t.tdFinalCost}</strong>
                   </td>
                   <td className="num">
                     <strong>{won(result.total)}</strong>
@@ -179,18 +178,12 @@ export default function DutyCalculator({ initialHsCode, onSelect }) {
               </tbody>
             </table>
             {!result.ftaAvailable && result.basicRate != null && (
-              <p className="reason">
-                선택한 원산지에는 등록된 FTA 협정세율이 없어 기본세율/WTO협정세율 중 낮은 쪽을 적용했습니다
-                (기본세율 {result.basicRate}%).
-              </p>
+              <p className="reason">{t.ftaFallbackReason(result.basicRate)}</p>
             )}
-            <p className="meta">
-              본 계산은 참고용이며 법적 효력이 없습니다. FTA 협정세율은 원산지증명서 구비 시에만 적용 가능하며,
-              정확한 세액은 관세사 확인이 필요합니다.
-            </p>
+            <p className="meta">{t.disclaimer}</p>
             {onSelect && (
               <button className="demo-link" onClick={() => onSelect(result.hs)}>
-                이 코드로 수입요건 조회 →
+                {t.selectButton}
               </button>
             )}
           </article>

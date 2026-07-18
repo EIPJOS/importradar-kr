@@ -98,6 +98,11 @@ button, a, input, textarea {
 .sidebar-brand img { height: 26px; width: auto; }
 .sidebar-brand span { font-family: var(--serif); font-weight: 700; font-size: 22px; }
 
+.lang-switch-group { display: flex; align-items: center; gap: 2px; margin: 0 8px 16px; border: 1px solid rgba(246, 243, 234, 0.18); border-radius: 999px; padding: 3px; width: fit-content; }
+.lang-switch { padding: 5px 11px; font-size: 12.5px; font-weight: 600; border-radius: 999px; letter-spacing: .02em; color: rgba(246, 243, 234, 0.65); }
+.lang-switch:hover { color: #fff; }
+.lang-switch.active { background: rgba(246, 243, 234, 0.16); color: #fff; }
+
 .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 
 .nav-item.top {

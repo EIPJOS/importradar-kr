@@ -1,18 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { browseHsCodes, browseHsCodesInChapter, getChapterCounts } from "../lib/supabase.js";
 import { HS_SECTIONS, findChapterName } from "../lib/hsSections.js";
+import { useT } from "../lib/i18n.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6 ? `${hs.slice(0, 4)}.${hs.slice(4, 6)}${hs.length > 6 ? "-" + hs.slice(6) : ""}` : hs;
 
 function ResultTable({ rows, onSelect }) {
+  const t = useT("hsBrowser");
   return (
     <table className="browser-table">
       <thead>
         <tr>
-          <th>HS부호</th>
-          <th>한글품목명</th>
-          <th>영문품목명</th>
+          <th>{t.colHsCode}</th>
+          <th>{t.colNameKo}</th>
+          <th>{t.colNameEn}</th>
         </tr>
       </thead>
       <tbody>
@@ -29,6 +31,7 @@ function ResultTable({ rows, onSelect }) {
 }
 
 export default function HsCodeBrowser({ onSelect }) {
+  const t = useT("hsBrowser");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,25 +95,25 @@ export default function HsCodeBrowser({ onSelect }) {
       <section className="browser">
         <div className="browser-head">
           <h2>
-            제{Number(chapter)}류 {findChapterName(chapter)}
+            {t.chapterTitle(Number(chapter))} {findChapterName(chapter)}
           </h2>
-          <span className="browser-count">{chapterCounts?.get(chapter) ?? "—"}건</span>
+          <span className="browser-count">{t.count(chapterCounts?.get(chapter) ?? "—")}</span>
         </div>
         <button type="button" className="chip" onClick={backToBrowse} style={{ marginBottom: 10 }}>
-          ← 부·류 목록으로
+          {t.backToBrowse}
         </button>
         <input
           className="browser-search"
           value={chapterQ}
           onChange={(e) => setChapterQ(e.target.value)}
-          placeholder="이 류 안에서 코드 또는 품목명으로 검색"
+          placeholder={t.chapterSearchPlaceholder}
           autoFocus
         />
-        {chapterLoading && <p className="empty">불러오는 중…</p>}
-        {!chapterLoading && chapterRows.length === 0 && <p className="empty">일치하는 HS코드가 없습니다.</p>}
+        {chapterLoading && <p className="empty">{t.loading}</p>}
+        {!chapterLoading && chapterRows.length === 0 && <p className="empty">{t.noResultsChapter}</p>}
         {!chapterLoading && chapterRows.length > 0 && <ResultTable rows={chapterRows} onSelect={onSelect} />}
         {!chapterLoading && chapterRows.length === 120 && (
-          <p className="browser-more">상위 120건만 표시됩니다 — 검색어로 좁혀보세요.</p>
+          <p className="browser-more">{t.moreResultsChapter}</p>
         )}
       </section>
     );
@@ -121,23 +124,23 @@ export default function HsCodeBrowser({ onSelect }) {
     return (
       <section className="browser">
         <div className="browser-head">
-          <h2>HS코드 분류표</h2>
-          <span className="browser-count">전체 12,469건 중 검색</span>
+          <h2>{t.title}</h2>
+          <span className="browser-count">{t.searchingAll}</span>
         </div>
         <input
           className="browser-search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="HS코드 앞자리(예: 0202) 또는 품목명(예: 냉동)으로 검색"
+          placeholder={t.searchPlaceholder}
           autoFocus
         />
-        {loading && <p className="empty">불러오는 중…</p>}
+        {loading && <p className="empty">{t.loading}</p>}
         {!loading && rows.length === 0 && (
-          <p className="empty">일치하는 HS코드가 없습니다. 검색어를 줄이거나 코드 앞자리로 시도해 보세요.</p>
+          <p className="empty">{t.noResultsSearch}</p>
         )}
         {!loading && rows.length > 0 && <ResultTable rows={rows} onSelect={onSelect} />}
         {!loading && rows.length === 60 && (
-          <p className="browser-more">상위 60건만 표시됩니다 — 검색어를 더 구체적으로 입력해 좁혀보세요.</p>
+          <p className="browser-more">{t.moreResultsSearch}</p>
         )}
       </section>
     );
@@ -147,15 +150,15 @@ export default function HsCodeBrowser({ onSelect }) {
   return (
     <section className="browser">
       <div className="browser-head">
-        <h2>HS코드 분류표</h2>
-        <span className="browser-count">부(21개)·류(97개) 계층 탐색</span>
+        <h2>{t.title}</h2>
+        <span className="browser-count">{t.hierarchySubtitle}</span>
       </div>
 
       <input
         className="browser-search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="HS코드 앞자리(예: 0202) 또는 품목명(예: 냉동)으로 검색"
+        placeholder={t.searchPlaceholder}
         autoFocus
       />
 
@@ -167,7 +170,7 @@ export default function HsCodeBrowser({ onSelect }) {
               className="section-row"
               onClick={() => setOpenSection(openSection === section.no ? null : section.no)}
             >
-              <span className="no">제{section.no}부</span>
+              <span className="no">{t.sectionLabel(section.no)}</span>
               <span className="name">{section.name}</span>
               <span className={`chevron ${openSection === section.no ? "open" : ""}`}>▾</span>
             </button>
@@ -175,9 +178,9 @@ export default function HsCodeBrowser({ onSelect }) {
               <div className="chapter-sublist">
                 {section.chapters.map((c) => (
                   <button type="button" key={c.no} className="chapter-row" onClick={() => openChapter(c.no)}>
-                    <span className="no">{c.no}류</span>
+                    <span className="no">{t.chapterLabel(c.no)}</span>
                     <span className="name">{c.name}</span>
-                    <span className="count">{chapterCounts?.get(c.no) ? `${chapterCounts.get(c.no)}건` : ""}</span>
+                    <span className="count">{chapterCounts?.get(c.no) ? t.count(chapterCounts.get(c.no)) : ""}</span>
                   </button>
                 ))}
               </div>
@@ -186,11 +189,11 @@ export default function HsCodeBrowser({ onSelect }) {
         ))}
       </div>
 
-      {loading && <p className="empty">불러오는 중…</p>}
+      {loading && <p className="empty">{t.loading}</p>}
       {!loading && rows.length > 0 && (
         <>
           <p className="classify-note" style={{ marginTop: 16 }}>
-            자주 조회되는 품목
+            {t.frequentItems}
           </p>
           <ResultTable rows={rows} onSelect={onSelect} />
         </>

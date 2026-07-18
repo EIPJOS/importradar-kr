@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import { REQUIRED_NUTRIENTS } from "../lib/nutritionDailyValues.js";
+import { useT } from "../lib/i18n.jsx";
 
-const STEPS = ["수입업소", "제품정보", "원재료", "제조공정", "영양정보", "최종확인"];
 const MAX_FILE_MB = 20;
 const MAX_TOTAL_MB = 40;
 
 const emptyIngredient = () => ({ name: "", origin: "", ratio_percent: "" });
 
 export default function QuarantineRequestForm() {
+  const t = useT("quarantine");
+  const STEPS = t.steps;
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -36,7 +38,7 @@ export default function QuarantineRequestForm() {
   function onFileChange(key, fileList) {
     const file = fileList?.[0] ?? null;
     if (file && file.size > MAX_FILE_MB * 1024 * 1024) {
-      setError(`파일당 최대 ${MAX_FILE_MB}MB까지 첨부할 수 있습니다.`);
+      setError(t.errorFileTooLarge(MAX_FILE_MB));
       return;
     }
     setError(null);
@@ -63,7 +65,7 @@ export default function QuarantineRequestForm() {
 
   async function onSubmit() {
     if (totalFileMb() > MAX_TOTAL_MB) {
-      setError(`첨부파일 전체 용량은 ${MAX_TOTAL_MB}MB를 넘을 수 없습니다.`);
+      setError(t.errorTotalTooLarge(MAX_TOTAL_MB));
       return;
     }
     setSubmitting(true);
@@ -101,15 +103,15 @@ export default function QuarantineRequestForm() {
     return (
       <section className="classify">
         <div className="browser-head">
-          <h2>가공식품 의뢰</h2>
+          <h2>{t.heading}</h2>
         </div>
         <div className="classify-results">
           <article className="classify-card">
             <div className="card-head">
-              <span className="badge confidence-high">접수 완료</span>
+              <span className="badge confidence-high">{t.doneBadge}</span>
             </div>
-            <h3>검역 의뢰가 정상적으로 전달되었습니다</h3>
-            <p className="meta">제이앤비관세사무소에서 입력하신 이메일로 연락드립니다.</p>
+            <h3>{t.doneTitle}</h3>
+            <p className="meta">{t.doneMeta}</p>
           </article>
         </div>
       </section>
@@ -119,13 +121,10 @@ export default function QuarantineRequestForm() {
   return (
     <section className="classify">
       <div className="browser-head">
-        <h2>가공식품 의뢰</h2>
-        <span className="browser-count">수입식품 검역 정보 입력</span>
+        <h2>{t.heading}</h2>
+        <span className="browser-count">{t.subheading}</span>
       </div>
-      <p className="classify-note">
-        제조사 자료를 기다리지 않고, 수입자가 직접 검역 기초 정보를 정리해 제이앤비관세사무소로
-        전달할 수 있습니다.
-      </p>
+      <p className="classify-note">{t.note}</p>
 
       <div className="chip-row">
         {STEPS.map((s, i) => (
@@ -147,34 +146,34 @@ export default function QuarantineRequestForm() {
       >
         {step === 0 && (
           <>
-            <label className="classify-label">수입업소명 *</label>
+            <label className="classify-label">{t.labelImporterName}</label>
             <input className="browser-search" value={importer.name} onChange={(e) => setImporter({ ...importer, name: e.target.value })} />
-            <label className="classify-label">수입업소 주소</label>
+            <label className="classify-label">{t.labelImporterAddress}</label>
             <input className="browser-search" value={importer.address} onChange={(e) => setImporter({ ...importer, address: e.target.value })} />
-            <label className="classify-label">수입업소 연락처</label>
+            <label className="classify-label">{t.labelImporterPhone}</label>
             <input className="browser-search" value={importer.phone} onChange={(e) => setImporter({ ...importer, phone: e.target.value })} />
-            <label className="classify-label">사업자번호</label>
+            <label className="classify-label">{t.labelBizNo}</label>
             <input className="browser-search" value={importer.bizNo} onChange={(e) => setImporter({ ...importer, bizNo: e.target.value })} />
-            <label className="classify-label">이메일 *</label>
+            <label className="classify-label">{t.labelEmail}</label>
             <input className="browser-search" type="email" value={importer.email} onChange={(e) => setImporter({ ...importer, email: e.target.value })} />
 
-            <label className="classify-label">사업자등록증</label>
+            <label className="classify-label">{t.labelBizRegFile}</label>
             <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx" onChange={(e) => onFileChange("bizReg", e.target.files)} />
-            <label className="classify-label">수입식품등의 수입판매업 영업등록증</label>
+            <label className="classify-label">{t.labelImportRegFile}</label>
             <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx" onChange={(e) => onFileChange("importReg", e.target.files)} />
-            <p className="meta">허용 형식: PDF, JPG, PNG, WEBP, HEIC, DOC, DOCX / 파일당 {MAX_FILE_MB}MB, 전체 {MAX_TOTAL_MB}MB 이하</p>
+            <p className="meta">{t.fileHint(MAX_FILE_MB, MAX_TOTAL_MB)}</p>
           </>
         )}
 
         {step === 1 && (
           <>
-            <label className="classify-label">제품명 *</label>
+            <label className="classify-label">{t.labelProductName}</label>
             <input className="browser-search" value={product.name} onChange={(e) => setProduct({ ...product, name: e.target.value })} />
-            <label className="classify-label">원산지</label>
+            <label className="classify-label">{t.labelProductOrigin}</label>
             <input className="browser-search" value={product.origin} onChange={(e) => setProduct({ ...product, origin: e.target.value })} />
-            <label className="classify-label">HS코드</label>
+            <label className="classify-label">{t.labelHsCode}</label>
             <input className="browser-search" value={product.hsCode} onChange={(e) => setProduct({ ...product, hsCode: e.target.value })} />
-            <label className="classify-label">포장단위</label>
+            <label className="classify-label">{t.labelPackagingUnit}</label>
             <input className="browser-search" value={product.packagingUnit} onChange={(e) => setProduct({ ...product, packagingUnit: e.target.value })} />
           </>
         )}
@@ -183,32 +182,32 @@ export default function QuarantineRequestForm() {
           <>
             {ingredients.map((ing, i) => (
               <div key={i} className="chip-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
-                <label className="classify-label">원재료 {i + 1}</label>
-                <input className="browser-search" placeholder="원재료명" value={ing.name} onChange={(e) => updateIngredient(i, "name", e.target.value)} />
-                <input className="browser-search" placeholder="원산지" value={ing.origin} onChange={(e) => updateIngredient(i, "origin", e.target.value)} />
-                <input className="browser-search" placeholder="배합비율 (%)" type="number" value={ing.ratio_percent} onChange={(e) => updateIngredient(i, "ratio_percent", e.target.value)} />
+                <label className="classify-label">{t.labelIngredient(i + 1)}</label>
+                <input className="browser-search" placeholder={t.placeholderIngredientName} value={ing.name} onChange={(e) => updateIngredient(i, "name", e.target.value)} />
+                <input className="browser-search" placeholder={t.placeholderIngredientOrigin} value={ing.origin} onChange={(e) => updateIngredient(i, "origin", e.target.value)} />
+                <input className="browser-search" placeholder={t.placeholderIngredientRatio} type="number" value={ing.ratio_percent} onChange={(e) => updateIngredient(i, "ratio_percent", e.target.value)} />
                 {ingredients.length > 1 && (
                   <button type="button" className="demo-link" onClick={() => removeIngredient(i)}>
-                    삭제
+                    {t.deleteBtn}
                   </button>
                 )}
               </div>
             ))}
             <button type="button" className="chip" onClick={addIngredient}>
-              + 원재료 추가
+              {t.addIngredientBtn}
             </button>
           </>
         )}
 
         {step === 3 && (
           <>
-            <label className="classify-label">제조공정 설명</label>
+            <label className="classify-label">{t.labelProcess}</label>
             <textarea
               className="browser-search"
               rows={8}
               value={process}
               onChange={(e) => setProcess(e.target.value)}
-              placeholder="원재료 투입부터 포장까지 제조공정을 순서대로 설명해주세요."
+              placeholder={t.placeholderProcess}
             />
           </>
         )}
@@ -234,13 +233,13 @@ export default function QuarantineRequestForm() {
         {step === 5 && (
           <div className="classify-results">
             <article className="classify-card">
-              <h3>{importer.name || "수입업소명 미입력"}</h3>
+              <h3>{importer.name || t.importerNameFallback}</h3>
               <p className="meta">{importer.email}</p>
-              <p className="reason">제품명: {product.name || "미입력"}</p>
-              <p className="reason">원재료 {ingredients.filter((i) => i.name.trim()).length}건</p>
+              <p className="reason">{t.reasonProductName(product.name || t.productNameFallback)}</p>
+              <p className="reason">{t.ingredientsCount(ingredients.filter((i) => i.name.trim()).length)}</p>
               <p className="meta">
-                첨부파일 {[files.bizReg, files.importReg].filter(Boolean).length}건
-                {totalFileMb() > 0 ? ` (${totalFileMb().toFixed(1)}MB)` : ""}
+                {t.attachmentsCount([files.bizReg, files.importReg].filter(Boolean).length)}
+                {totalFileMb() > 0 ? t.attachmentsSizeSuffix(totalFileMb().toFixed(1)) : ""}
               </p>
             </article>
           </div>
@@ -249,11 +248,11 @@ export default function QuarantineRequestForm() {
         <div className="chip-row">
           {step > 0 && (
             <button type="button" className="chip" onClick={() => setStep((s) => s - 1)}>
-              이전
+              {t.prevBtn}
             </button>
           )}
           <button className="classify-submit" type="submit" disabled={submitting || !canProceed()}>
-            {step === STEPS.length - 1 ? (submitting ? "전송 중…" : "제출하기") : "다음"}
+            {step === STEPS.length - 1 ? (submitting ? t.submittingBtn : t.submitBtn) : t.nextBtn}
           </button>
         </div>
       </form>

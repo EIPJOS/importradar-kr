@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, Navigate } from "react-router-dom";
 import { searchUnified } from "./lib/supabase.js";
 import Seal from "./components/Seal.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -13,22 +14,29 @@ import NutritionRequirementCheck from "./components/NutritionRequirementCheck.js
 import NutritionPercentCalc from "./components/NutritionPercentCalc.jsx";
 import QuarantineRequestForm from "./components/QuarantineRequestForm.jsx";
 import AboutCompany from "./components/AboutCompany.jsx";
+import { useT, LangContext } from "./lib/i18n.jsx";
+import CONTENT from "./content/index.js";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6
     ? `${hs.slice(0, 4)}.${hs.slice(4, 6)}${hs.length > 6 ? "-" + hs.slice(6) : ""}`
     : hs;
 
-const fmtDate = (d) => (d ? d.replaceAll("-", ".") : "미상");
+export default function AppRoute() {
+  const { lang } = useParams();
+  if (!CONTENT[lang]) return <Navigate to="/ko" replace />;
+  return (
+    <LangContext.Provider value={lang}>
+      <App />
+    </LangContext.Provider>
+  );
+}
 
-// 히어로 통계 — 지어낸 숫자가 아니라 실제 DB 수치(주기적으로 직접 갱신)
-const STATS = [
-  { value: "1,425건", label: "부적합·회수 이력" },
-  { value: "82건", label: "최근 법령 개정" },
-  { value: "실시간", label: "관세청 요건 연동" },
-];
+function App() {
+  const t = useT("home");
+  const tc = useT("common");
+  const fmtDate = (d) => (d ? d.replaceAll("-", ".") : t.dateUnknown);
 
-export default function App() {
   const [view, setView] = useState("home"); // "home" | "browse"
   const [q, setQ] = useState("");
   const [result, setResult] = useState(null);
@@ -38,6 +46,13 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(false);
   const searchInputRef = useRef(null);
   const searchSectionRef = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.lang = tc.meta.lang;
+    document.title = tc.meta.title;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute("content", tc.meta.description);
+  }, [tc]);
 
   async function runSearch(value) {
     if (!value.trim()) return;
@@ -96,8 +111,8 @@ export default function App() {
 
       <div className="main">
         <div className="mobile-bar">
-          <button className="hamburger" onClick={() => setNavOpen(true)} aria-label="메뉴 열기">☰</button>
-          <span className="mobile-brand">통관메이트</span>
+          <button className="hamburger" onClick={() => setNavOpen(true)} aria-label={tc.mobileMenuAria}>☰</button>
+          <span className="mobile-brand">{tc.brand}</span>
         </div>
 
         {view === "browse" && (
@@ -172,22 +187,19 @@ export default function App() {
             <section className="hero">
               <div className="hero-left">
                 <div className="partner-credit">
-                  <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
-                  <span>제이앤비관세사무소 · 수입통관 전문 관세사</span>
+                  <img src="/jnb-logo.png" alt={tc.logoAlt} />
+                  <span>{t.partnerCredit}</span>
                 </div>
 
                 <h1 className="hero-title">
-                  수입 통관, 될지 안 될지
+                  {t.heroTitle[0]}
                   <br />
-                  검색 한 번으로 확인하세요
+                  {t.heroTitle[1]}
                 </h1>
-                <p className="hero-sub">
-                  HS코드나 품목명만 입력하면 세관장확인 요건, 과거 부적합·회수 이력,
-                  관련 법령 개정까지 한 화면에서 바로 보여드려요
-                </p>
+                <p className="hero-sub">{t.heroSub}</p>
 
                 <div className="stat-row">
-                  {STATS.map((s) => (
+                  {t.stats.map((s) => (
                     <div className="stat" key={s.label}>
                       <div className="stat-value">{s.value}</div>
                       <div className="stat-label">{s.label}</div>
@@ -197,10 +209,10 @@ export default function App() {
 
                 <div className="cta-row">
                   <button className="btn-primary" onClick={focusSearch}>
-                    지금 조회하기
+                    {t.ctaPrimary}
                   </button>
                   <button className="btn-secondary" onClick={tryDemo}>
-                    예시로 먼저 보기
+                    {t.ctaSecondary}
                   </button>
                 </div>
               </div>
@@ -208,32 +220,22 @@ export default function App() {
               <div className="hero-right">
                 <div className="demo-card">
                   <div className="demo-card-head">
-                    <span>화장품 원료 — 조회 예시</span>
+                    <span>{t.demoHead}</span>
                     <span className="demo-hs">HS 3307.90-3000</span>
                   </div>
                   <ul className="demo-list">
-                    <li>
-                      <span>약사법 확인대상</span>
-                      <span className="pill ok">요건 있음</span>
-                    </li>
-                    <li>
-                      <span>한국의약품수출입협회</span>
-                      <span className="pill info">승인기관</span>
-                    </li>
-                    <li>
-                      <span>한국동물약품협회</span>
-                      <span className="pill info">승인기관</span>
-                    </li>
-                    <li>
-                      <span>적용시작일</span>
-                      <span className="pill neutral">2020.04.06</span>
-                    </li>
+                    {t.demoItems.map((d) => (
+                      <li key={d.label}>
+                        <span>{d.label}</span>
+                        <span className={`pill ${d === t.demoItems[3] ? "neutral" : d === t.demoItems[0] ? "ok" : "info"}`}>{d.pill}</span>
+                      </li>
+                    ))}
                   </ul>
                   <div className="demo-verify">
                     <Seal size={26} ringText="VERIFIED · REAL-TIME" center="檢" />
-                    <span>관세청 원본 실시간 조회 완료</span>
+                    <span>{t.demoVerify}</span>
                     <button className="demo-link" onClick={tryDemo}>
-                      직접 조회 →
+                      {t.demoLink}
                     </button>
                   </div>
                 </div>
@@ -247,26 +249,26 @@ export default function App() {
                   ref={searchInputRef}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="HS코드(예: 0202) 또는 품목명(예: 냉동 쇠고기)"
+                  placeholder={t.searchPlaceholder}
                 />
                 <button type="submit" disabled={loading}>
-                  {loading ? "조회 중" : "조회"}
+                  {loading ? t.searchBtnLoading : t.searchBtn}
                 </button>
               </form>
 
-              {error && <p className="error">조회에 실패했습니다: {error}</p>}
+              {error && <p className="error">{t.errorPrefix}{error}</p>}
 
               {result && (
                 <>
                   <nav className="tabs">
                     <button className={tab === "req" ? "on" : ""} onClick={() => setTab("req")}>
-                      <span className="tab-dot req" /> 수입요건 <em>{req.length}</em>
+                      <span className="tab-dot req" /> {t.tabReq} <em>{req.length}</em>
                     </button>
                     <button className={tab === "hist" ? "on" : ""} onClick={() => setTab("hist")}>
-                      <span className="tab-dot hist" /> 부적합·회수 이력 <em>{hist.length}</em>
+                      <span className="tab-dot hist" /> {t.tabHist} <em>{hist.length}</em>
                     </button>
                     <button className={tab === "reg" ? "on" : ""} onClick={() => setTab("reg")}>
-                      <span className="tab-dot reg" /> 법령 업데이트 <em>{regs.length}</em>
+                      <span className="tab-dot reg" /> {t.tabReg} <em>{regs.length}</em>
                     </button>
                   </nav>
 
@@ -275,22 +277,20 @@ export default function App() {
                       {isLiveVerified && req.length > 0 && (
                         <div className="verify-strip">
                           <Seal size={30} ringText="VERIFIED · REAL-TIME" center="檢" />
-                          <span>관세청 원본 데이터를 지금 이 순간 실시간으로 조회했습니다</span>
+                          <span>{t.liveVerifiedStrip}</span>
                         </div>
                       )}
                       {req.length === 0 && (
-                        <p className="empty">
-                          해당 HS코드에 등록된 세관장확인 요건이 없습니다. 코드 앞자리(류·호 단위)로 다시 검색해 보세요.
-                        </p>
+                        <p className="empty">{t.emptyReq}</p>
                       )}
                       {req.length > 0 && (
                         <table>
                           <thead>
                             <tr>
-                              <th>HS부호</th>
-                              <th>확인법령</th>
-                              <th>요건승인기관</th>
-                              <th>적용시작</th>
+                              <th>{t.reqTableHead[0]}</th>
+                              <th>{t.reqTableHead[1]}</th>
+                              <th>{t.reqTableHead[2]}</th>
+                              <th>{t.reqTableHead[3]}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -310,20 +310,20 @@ export default function App() {
 
                   {tab === "hist" && (
                     <div className="cards">
-                      {hist.length === 0 && <p className="empty">등록된 부적합·회수 이력이 없습니다.</p>}
+                      {hist.length === 0 && <p className="empty">{t.emptyHist}</p>}
                       {hist.map((h) => (
                         <article key={h.id} className={`card ${h.source}`}>
                           <div className="card-head">
                             <span className={`badge ${h.source}`}>
-                              {h.source === "rejection" ? "통관 부적합" : `회수${h.recall_grade ? " · " + h.recall_grade : ""}`}
+                              {h.source === "rejection" ? t.badgeRejection : `${t.badgeRecall}${h.recall_grade ? " · " + h.recall_grade : ""}`}
                             </span>
                             <time>{fmtDate(h.event_date)}</time>
                           </div>
                           <h3>{h.product_name}</h3>
                           <p className="meta">
-                            {[h.origin_country, h.company_name].filter(Boolean).join(" · ") || "업체 정보 미공개"}
+                            {[h.origin_country, h.company_name].filter(Boolean).join(" · ") || t.companyUnknown}
                           </p>
-                          <p className="reason">{h.reason_summary ?? h.reason ?? "사유 미공개"}</p>
+                          <p className="reason">{h.reason_summary ?? h.reason ?? t.reasonUnknown}</p>
                         </article>
                       ))}
                     </div>
@@ -331,12 +331,12 @@ export default function App() {
 
                   {tab === "reg" && (
                     <div className="cards">
-                      {regs.length === 0 && <p className="empty">최근 90일 내 관련 법령 개정 이력이 없습니다.</p>}
+                      {regs.length === 0 && <p className="empty">{t.emptyReg}</p>}
                       {regs.map((g) => (
                         <article key={g.id} className="card">
                           <div className="card-head">
-                            <span className="badge law">{g.amendment_type ?? "개정"}</span>
-                            <time>시행 {fmtDate(g.effective_on)}</time>
+                            <span className="badge law">{g.amendment_type ?? t.amendmentDefault}</span>
+                            <time>{t.effectivePrefix}{fmtDate(g.effective_on)}</time>
                           </div>
                           <h3>
                             {g.detail_url ? (
@@ -358,8 +358,8 @@ export default function App() {
 
               {!result && !loading && (
                 <div className="hint">
-                  <p>데이터 출처: 관세청 세관장확인대상물품 · 식약처 수입식품 부적합/회수 · 법제처 국가법령정보.</p>
-                  <p>수입요건은 검색 시점에 관세청 원본을 실시간으로 조회하며, 부적합·회수·법령은 매일 자동 갱신됩니다.</p>
+                  <p>{t.hint1}</p>
+                  <p>{t.hint2}</p>
                 </div>
               )}
             </section>
@@ -367,11 +367,9 @@ export default function App() {
         )}
 
         <footer>
-          <img src="/jnb-logo-horizontal.png" alt="제이앤비관세사무소" className="footer-logo" />
-          <span>© {new Date().getFullYear()} 통관메이트 · Customs Mate · 제이앤비관세사무소</span>
-          <span className="disclaimer">
-            본 서비스는 참고용이며 법적 효력이 없습니다. 최종 확인은 유니패스·식품안전나라·국가법령정보센터 원문을 기준으로 하시기 바랍니다.
-          </span>
+          <img src="/jnb-logo-horizontal.png" alt={tc.logoAlt} className="footer-logo" />
+          <span>{t.footerLine(new Date().getFullYear())}</span>
+          <span className="disclaimer">{t.footerDisclaimer}</span>
         </footer>
       </div>
     </div>

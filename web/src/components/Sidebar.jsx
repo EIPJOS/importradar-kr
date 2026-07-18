@@ -1,39 +1,8 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useT, useLang, LANGS } from "../lib/i18n.jsx";
 
-// 포켓커스텀 사이드바 구조를 그대로 따르되, 아직 없는 기능은 "준비중"으로
-// 정직하게 표시한다(가짜로 작동하는 척하지 않음). soon:false인 항목만 실제 작동한다.
-const NAV_GROUPS = [
-  {
-    label: "HS CODE",
-    items: [
-      { label: "빠른 HS CODE 분류", soon: false, id: "classify" },
-      { label: "HS코드 분류표", soon: false, id: "browse" },
-      { label: "원큐 (One Queue) - B2B API", soon: false, id: "oneq" },
-    ],
-  },
-  {
-    label: "도구",
-    items: [
-      { label: "수입 관부가세 계산기", soon: false, id: "calc" },
-      { label: "KC 인증대상 확인", soon: false, id: "kc" },
-    ],
-  },
-  {
-    label: "식품검역",
-    items: [
-      { label: "식품유형 확인", soon: false, id: "foodtype" },
-      { label: "정밀검사비용 확인", soon: false, id: "inspectioncost" },
-      { label: "영양성분 입력대상 확인", soon: false, id: "nutritionreq" },
-      { label: "영양성분 퍼센트 계산", soon: false, id: "nutritionpct" },
-    ],
-  },
-  {
-    label: "수입식품 검역 의뢰",
-    items: [{ label: "가공식품 의뢰", soon: false, id: "quarantine" }],
-  },
-];
-
-function NavGroup({ group, defaultOpen, view, onNavigate }) {
+function NavGroup({ group, defaultOpen, view, onNavigate, soonLabel, soonTitle }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="nav-group">
@@ -47,9 +16,9 @@ function NavGroup({ group, defaultOpen, view, onNavigate }) {
             {group.items.map((item) =>
               item.soon ? (
                 <li key={item.label}>
-                  <button className="nav-item soon" disabled title="준비 중인 기능입니다">
+                  <button className="nav-item soon" disabled title={soonTitle}>
                     <span>{item.label}</span>
-                    <span className="soon-tag">준비중</span>
+                    <span className="soon-tag">{soonLabel}</span>
                   </button>
                 </li>
               ) : (
@@ -71,29 +40,48 @@ function NavGroup({ group, defaultOpen, view, onNavigate }) {
 }
 
 export default function Sidebar({ open, onClose, view, onNavigate }) {
+  const t = useT("common");
+  const lang = useLang();
+
   return (
     <>
       {open && <div className="sidebar-scrim" onClick={onClose} />}
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <img src="/jnb-logo.png" alt="제이앤비관세사무소" />
-          <span>통관메이트</span>
+          <img src="/jnb-logo.png" alt={t.logoAlt} />
+          <span>{t.brand}</span>
+        </div>
+
+        <div className="lang-switch-group">
+          {LANGS.map((l) => (
+            <Link key={l} to={`/${l}`} className={`lang-switch ${l === lang ? "active" : ""}`}>
+              {t.langSwitch[l]}
+            </Link>
+          ))}
         </div>
 
         <nav className="sidebar-nav">
           <button className={`nav-item top ${view === "home" ? "on" : ""}`} onClick={() => onNavigate("home")}>
-            홈
+            {t.navHome}
           </button>
           <button className={`nav-item top ${view === "about" ? "on" : ""}`} onClick={() => onNavigate("about")}>
-            회사소개
+            {t.navAbout}
           </button>
 
-          {NAV_GROUPS.map((g) => (
-            <NavGroup key={g.label} group={g} defaultOpen view={view} onNavigate={onNavigate} />
+          {t.navGroups.map((g) => (
+            <NavGroup
+              key={g.label}
+              group={g}
+              defaultOpen
+              view={view}
+              onNavigate={onNavigate}
+              soonLabel={t.soonLabel}
+              soonTitle={t.soonTitle}
+            />
           ))}
         </nav>
 
-        <div className="sidebar-foot">© {new Date().getFullYear()} 제이앤비관세사무소</div>
+        <div className="sidebar-foot">{t.footer(new Date().getFullYear())}</div>
       </aside>
     </>
   );

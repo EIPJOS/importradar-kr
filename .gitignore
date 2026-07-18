@@ -12,3 +12,5 @@ pipeline/data/*
 !pipeline/data/kc_categories_*.json
 !pipeline/data/food_types_*.json
 !pipeline/data/inspection_items_*.json
+
+.vercel

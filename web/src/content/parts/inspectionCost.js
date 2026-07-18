@@ -1,0 +1,66 @@
+export default {
+  ko: {
+    pageTitle: "정밀검사비용 확인",
+    itemCount: "식품유형·재질별 정밀검사 대상 안내 · 224개 품목",
+    introNote:
+      "정밀검사 수수료는 관세청·식약처가 고시하는 법정 금액이 아니라 지정시험검사기관이 개별 산정하는 값입니다. 아래에서 식품유형 또는 기구·용기 재질을 확인하고, 일반적인 비용 범위를 참고한 뒤 정확한 견적은 지정시험검사기관에 직접 문의하세요.",
+    categoryLabel: { food: "가공식품", container: "기구·용기등" },
+    categoryRange: {
+      food: "통상 30만원~150만원 수준 (검사항목이 많은 특수영양식품·다류 등은 더 높을 수 있음)",
+      container: "통상 10만원~60만원 수준 (재질·부품 수에 따라 달라짐)",
+    },
+    searchLabel: "품목명 검색",
+    searchPlaceholder: { food: "예: 커피, 김치, 콩기름", container: "예: PET, 유리제" },
+    searchButton: "검색",
+    searching: "검색 중…",
+    resultCount: (n) => `검색 결과 ${n}건`,
+    selectCategoryNote: "또는 대분류에서 직접 선택하세요",
+    inspectionBadge: "정밀검사 대상",
+    costRangePrefix: "일반적인 비용 범위: ",
+    checkExactNote: "정확한 검사항목과 견적은 아래 식품안전나라 검사기관별 시험항목 검색에서 확인하세요.",
+    searchLinkText: "지정시험검사기관 검색 →",
+  },
+  en: {
+    pageTitle: "Precision Inspection Cost Check",
+    itemCount: "Precision inspection targets by food type / material · 224 items",
+    introNote:
+      "Precision inspection fees are not statutory amounts published by Korea Customs or MFDS — they are individually assessed by designated testing institutions. Check the food type or apparatus/container material below, review the typical cost range, and contact a designated testing institution directly for an exact quote.",
+    categoryLabel: { food: "Processed Food", container: "Apparatus/Container" },
+    categoryRange: {
+      food: "Typically KRW 300,000–1,500,000 (may be higher for special nutritional foods, tea, and other items with many test items)",
+      container: "Typically KRW 100,000–600,000 (varies by material and number of components)",
+    },
+    searchLabel: "Search by item name",
+    searchPlaceholder: { food: "e.g. coffee, kimchi, soybean oil", container: "e.g. PET, glass" },
+    searchButton: "Search",
+    searching: "Searching…",
+    resultCount: (n) => `${n} search result(s)`,
+    selectCategoryNote: "Or browse by major category",
+    inspectionBadge: "Precision Inspection Target",
+    costRangePrefix: "Typical cost range: ",
+    checkExactNote:
+      "For exact test items and quotes, use the Food Safety Korea search by designated testing institution below.",
+    searchLinkText: "Search designated testing institutions →",
+  },
+  cn: {
+    pageTitle: "精密检查费用查询",
+    itemCount: "按食品类型·材质区分的精密检查对象指南 · 224 个品目",
+    introNote:
+      "精密检查手续费并非关税厅、食药处公告的法定金额，而是由指定检验检测机构分别核算的费用。请在下方确认食品类型或器具·容器材质，参考一般费用区间后，就准确报价直接向指定检验检测机构咨询。",
+    categoryLabel: { food: "加工食品", container: "器具·容器等" },
+    categoryRange: {
+      food: "通常为30万至150万韩元水平（检查项目较多的特殊营养食品、茶类等可能更高）",
+      container: "通常为10万至60万韩元水平（因材质、部件数量而异）",
+    },
+    searchLabel: "按品目名称搜索",
+    searchPlaceholder: { food: "例：咖啡、泡菜、大豆油", container: "例：PET、玻璃制" },
+    searchButton: "搜索",
+    searching: "搜索中…",
+    resultCount: (n) => `搜索结果 ${n} 条`,
+    selectCategoryNote: "或直接从大类中选择",
+    inspectionBadge: "精密检查对象",
+    costRangePrefix: "一般费用区间：",
+    checkExactNote: "准确的检查项目和报价请在下方食品安全国家检验机构别检验项目搜索中确认。",
+    searchLinkText: "搜索指定检验检测机构 →",
+  },
+};
