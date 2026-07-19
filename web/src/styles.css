@@ -98,11 +98,9 @@ button, a, input, textarea {
 .sidebar-brand img { height: 26px; width: auto; }
 .sidebar-brand span { font-family: var(--serif); font-weight: 700; font-size: 22px; }
 
-.sidebar-sublogo-card { display: block; margin: 4px 8px 16px; padding: 10px 12px; border: 1px solid rgba(246,243,234,.16); border-radius: 10px; width: fit-content; transition: background .15s, border-color .15s; }
+.sidebar-sublogo-card { position: relative; display: flex; align-items: center; margin: 4px 8px 16px; padding: 10px 22px 10px 12px; border: 1px solid rgba(246,243,234,.16); border-radius: 10px; width: fit-content; transition: background .15s, border-color .15s; }
 .sidebar-sublogo-card:hover { background: rgba(246,243,234,.07); border-color: rgba(246,243,234,.32); }
-.sidebar-sublogo-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
-.sidebar-sublogo-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: rgba(246,243,234,.55); text-transform: uppercase; }
-.sidebar-sublogo-arrow { font-size: 12px; color: rgba(246,243,234,.5); transition: transform .15s, color .15s; }
+.sidebar-sublogo-arrow { position: absolute; top: 6px; right: 7px; font-size: 11px; line-height: 1; color: rgba(246,243,234,.45); transition: transform .15s, color .15s; }
 .sidebar-sublogo-card:hover .sidebar-sublogo-arrow { color: rgba(246,243,234,.85); transform: translate(1px, -1px); }
 .sidebar-sublogo-card img { height: 15px; width: auto; display: block; }
 
