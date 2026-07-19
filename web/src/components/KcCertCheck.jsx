@@ -1,12 +1,20 @@
 import React, { useState } from "react";
 import { searchKcItems } from "../lib/supabase.js";
-import { useT } from "../lib/i18n.jsx";
+import { useT, useLang } from "../lib/i18n.jsx";
 
+// badge color is decided off the always-Korean cert_type_name (stable regardless of display language)
 const badgeClass = (certTypeName) =>
   certTypeName.includes("안전인증") ? "confidence-high" : "confidence-medium";
 
+// DB name_ko/name_en/name_cn pattern: use the current-language column if present, else fall back to Korean.
+function pick(row, field, lang) {
+  if (lang === "ko") return row[field];
+  return row[`${field}_${lang}`] ?? row[field];
+}
+
 export default function KcCertCheck() {
   const t = useT("kc");
+  const lang = useLang();
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -75,10 +83,10 @@ export default function KcCertCheck() {
             <article key={r.total_code} className="classify-card">
               <div className="card-head">
                 <span className="demo-hs">{r.total_code}</span>
-                <span className={`badge ${badgeClass(r.cert_type_name)}`}>{r.cert_type_name}</span>
+                <span className={`badge ${badgeClass(r.cert_type_name)}`}>{pick(r, "cert_type_name", lang)}</span>
               </div>
-              <h3>{r.category_path.split(">").pop()}</h3>
-              <p className="meta">{r.category_path.split(">").join(" › ")}</p>
+              <h3>{pick(r, "category_path", lang).split(">").pop()}</h3>
+              <p className="meta">{pick(r, "category_path", lang).split(">").join(" › ")}</p>
             </article>
           ))}
         </div>

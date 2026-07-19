@@ -123,7 +123,9 @@ export async function searchKcItems(query) {
   if (!q) return [];
   const { data, error } = await supabase
     .from("kc_certification_items")
-    .select("total_code,cert_type_code,cert_type_name,category_path")
+    .select(
+      "total_code,cert_type_code,cert_type_name,cert_type_name_en,cert_type_name_cn,category_path,category_path_en,category_path_cn"
+    )
     .ilike("category_path", `%${q}%`)
     .limit(50);
   if (error) throw error;
