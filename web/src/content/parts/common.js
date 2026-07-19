@@ -107,6 +107,7 @@ export default {
     soonTitle: "준비 중인 기능입니다",
     footer: (year) => `© ${year} 제이앤비관세사무소`,
     mobileMenuAria: "메뉴 열기",
+    operatedBy: "운영",
     langSwitch: { ko: "KO", en: "EN", cn: "中文" },
   },
   en: {
@@ -124,6 +125,7 @@ export default {
     soonTitle: "This feature is coming soon",
     footer: (year) => `© ${year} JNB Global Customs`,
     mobileMenuAria: "Open menu",
+    operatedBy: "Operated By",
     langSwitch: { ko: "KO", en: "EN", cn: "中文" },
   },
   cn: {
@@ -141,6 +143,7 @@ export default {
     soonTitle: "该功能即将推出",
     footer: (year) => `© ${year} JNB Global Customs`,
     mobileMenuAria: "打开菜单",
+    operatedBy: "运营方",
     langSwitch: { ko: "KO", en: "EN", cn: "中文" },
   },
 };

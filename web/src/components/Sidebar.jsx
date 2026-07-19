@@ -56,8 +56,12 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
           href="https://www.jnbglobal.kr/ko"
           target="_blank"
           rel="noreferrer"
-          className="sidebar-sublogo"
+          className="sidebar-sublogo-card"
         >
+          <div className="sidebar-sublogo-row">
+            <span className="sidebar-sublogo-label">{t.operatedBy}</span>
+            <span className="sidebar-sublogo-arrow">↗</span>
+          </div>
           <img src="/jnb-sublogo.png" alt={t.logoAlt} />
         </a>
 
