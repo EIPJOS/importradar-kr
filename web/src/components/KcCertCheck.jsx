@@ -1,16 +1,10 @@
 import React, { useState } from "react";
 import { searchKcItems } from "../lib/supabase.js";
-import { useT, useLang } from "../lib/i18n.jsx";
+import { useT, useLang, pick } from "../lib/i18n.jsx";
 
 // badge color is decided off the always-Korean cert_type_name (stable regardless of display language)
 const badgeClass = (certTypeName) =>
   certTypeName.includes("안전인증") ? "confidence-high" : "confidence-medium";
-
-// DB name_ko/name_en/name_cn pattern: use the current-language column if present, else fall back to Korean.
-function pick(row, field, lang) {
-  if (lang === "ko") return row[field];
-  return row[`${field}_${lang}`] ?? row[field];
-}
 
 export default function KcCertCheck() {
   const t = useT("kc");

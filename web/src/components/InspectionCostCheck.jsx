@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { browseInspectionItems, searchInspectionItems } from "../lib/supabase.js";
-import { useT, useLang } from "../lib/i18n.jsx";
-
-// DB name_ko/name_en/name_cn pattern: use the current-language column if present, else fall back to Korean.
-function pick(row, field, lang) {
-  if (lang === "ko") return row[field];
-  return row[`${field}_${lang}`] ?? row[field];
-}
+import { useT, useLang, pick } from "../lib/i18n.jsx";
 
 export default function InspectionCostCheck() {
   const t = useT("inspectionCost");

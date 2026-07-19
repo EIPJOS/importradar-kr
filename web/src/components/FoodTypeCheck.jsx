@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { searchFoodTypes, browseFoodTypes } from "../lib/supabase.js";
-import { useT, useLang } from "../lib/i18n.jsx";
+import { useT, useLang, pick } from "../lib/i18n.jsx";
 
 const EXAMPLES = ["과자", "라면", "커피", "김치"];
-
-// DB name_ko/name_en/name_cn 패턴과 동일: 현재 언어 컬럼이 있으면 쓰고, 없으면(ko 등) 원본 한글로 폴백.
-function pick(row, field, lang) {
-  if (lang === "ko") return row[field];
-  return row[`${field}_${lang}`] ?? row[field];
-}
 
 export default function FoodTypeCheck() {
   const t = useT("foodType");
