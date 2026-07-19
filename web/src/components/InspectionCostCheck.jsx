@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { browseInspectionItems, searchInspectionItems } from "../lib/supabase.js";
-import { useT } from "../lib/i18n.jsx";
+import { useT, useLang } from "../lib/i18n.jsx";
+
+// DB name_ko/name_en/name_cn pattern: use the current-language column if present, else fall back to Korean.
+function pick(row, field, lang) {
+  if (lang === "ko") return row[field];
+  return row[`${field}_${lang}`] ?? row[field];
+}
 
 export default function InspectionCostCheck() {
   const t = useT("inspectionCost");
+  const lang = useLang();
   const CATEGORY_LABEL = t.categoryLabel;
   const CATEGORY_RANGE = t.categoryRange;
   const [category, setCategory] = useState("food");
@@ -83,10 +90,10 @@ export default function InspectionCostCheck() {
           <p className="classify-note">{t.resultCount(searchResults.length)}</p>
           {searchResults.map((r) => (
             <article key={r.id} className="classify-card" onClick={() => setSelected(r)} style={{ cursor: "pointer" }}>
-              <h3>{r.item_name}</h3>
+              <h3>{pick(r, "item_name", lang)}</h3>
               <p className="meta">
-                {r.major_category}
-                {r.mid_category !== r.major_category ? ` › ${r.mid_category}` : ""}
+                {pick(r, "major_category", lang)}
+                {r.mid_category !== r.major_category ? ` › ${pick(r, "mid_category", lang)}` : ""}
               </p>
             </article>
           ))}
@@ -104,8 +111,8 @@ export default function InspectionCostCheck() {
                 className={`chip ${openKey === g.major + g.mid ? "on" : ""}`}
                 onClick={() => setOpenKey(openKey === g.major + g.mid ? null : g.major + g.mid)}
               >
-                {g.major}
-                {g.mid !== g.major ? ` · ${g.mid}` : ""}
+                {pick(g.majorRow, "major_category", lang)}
+                {g.mid !== g.major ? ` · ${pick(g.midRow, "mid_category", lang)}` : ""}
               </button>
             ))}
           </div>
@@ -125,7 +132,7 @@ export default function InspectionCostCheck() {
                   onClick={() => setSelected(item)}
                   style={{ cursor: "pointer" }}
                 >
-                  <h3>{item.item_name}</h3>
+                  <h3>{pick(item, "item_name", lang)}</h3>
                 </article>
               ))}
             </div>
@@ -137,10 +144,10 @@ export default function InspectionCostCheck() {
             <div className="card-head">
               <span className="badge confidence-medium">{t.inspectionBadge}</span>
             </div>
-            <h3>{selected.item_name}</h3>
+            <h3>{pick(selected, "item_name", lang)}</h3>
             <p className="meta">
-              {selected.major_category}
-              {selected.mid_category !== selected.major_category ? ` › ${selected.mid_category}` : ""}
+              {pick(selected, "major_category", lang)}
+              {selected.mid_category !== selected.major_category ? ` › ${pick(selected, "mid_category", lang)}` : ""}
             </p>
             <p className="reason">{t.costRangePrefix}{CATEGORY_RANGE[category]}</p>
             <p className="meta">{t.checkExactNote}</p>

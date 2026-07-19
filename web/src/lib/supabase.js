@@ -184,7 +184,7 @@ export async function browseFoodTypes() {
 export async function browseInspectionItems(category) {
   const { data, error } = await supabase
     .from("inspection_costs")
-    .select("id,major_category,mid_category,item_name")
+    .select("id,major_category,mid_category,item_name,major_category_en,major_category_cn,mid_category_en,mid_category_cn,item_name_en,item_name_cn")
     .eq("category", category)
     .order("major_category", { ascending: true })
     .order("mid_category", { ascending: true })
@@ -193,7 +193,7 @@ export async function browseInspectionItems(category) {
   const groups = new Map();
   for (const row of data ?? []) {
     const key = `${row.major_category}${row.mid_category}`;
-    if (!groups.has(key)) groups.set(key, { major: row.major_category, mid: row.mid_category, items: [] });
+    if (!groups.has(key)) groups.set(key, { major: row.major_category, mid: row.mid_category, majorRow: row, midRow: row, items: [] });
     groups.get(key).items.push(row);
   }
   return [...groups.values()];
@@ -204,7 +204,7 @@ export async function searchInspectionItems(query, category) {
   if (!q) return [];
   let builder = supabase
     .from("inspection_costs")
-    .select("id,category,major_category,mid_category,item_name")
+    .select("id,category,major_category,mid_category,item_name,major_category_en,major_category_cn,mid_category_en,mid_category_cn,item_name_en,item_name_cn")
     .ilike("item_name", `%${q}%`)
     .limit(50);
   if (category) builder = builder.eq("category", category);
