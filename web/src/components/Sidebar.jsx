@@ -52,6 +52,15 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
           <span>{t.brand}</span>
         </div>
 
+        <a
+          href="https://www.jnbglobal.kr/ko"
+          target="_blank"
+          rel="noreferrer"
+          className="sidebar-sublogo"
+        >
+          <img src="/jnb-sublogo.png" alt={t.logoAlt} />
+        </a>
+
         <div className="lang-switch-group">
           {LANGS.map((l) => (
             <Link key={l} to={`/${l}`} className={`lang-switch ${l === lang ? "active" : ""}`}>
