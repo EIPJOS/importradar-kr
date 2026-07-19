@@ -1,6 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useT, useLang, LANGS } from "../lib/i18n.jsx";
+
+function LangDropdown({ lang, langSwitch }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  return (
+    <div className="lang-dropdown" ref={ref}>
+      <button
+        type="button"
+        className="lang-dropdown-trigger"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        {langSwitch[lang]} <span className={`chevron ${open ? "open" : ""}`}>▾</span>
+      </button>
+      {open && (
+        <div className="lang-dropdown-menu">
+          {LANGS.map((l) => (
+            <Link
+              key={l}
+              to={`/${l}`}
+              className={`lang-dropdown-item ${l === lang ? "active" : ""}`}
+              onClick={() => setOpen(false)}
+            >
+              {langSwitch[l]}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function NavGroup({ group, defaultOpen, view, onNavigate, soonLabel, soonTitle }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -52,22 +93,18 @@ export default function Sidebar({ open, onClose, view, onNavigate }) {
           <span>{t.brand}</span>
         </div>
 
-        <a
-          href="https://www.jnbglobal.kr/ko"
-          target="_blank"
-          rel="noreferrer"
-          className="sidebar-sublogo-card"
-        >
-          <span className="sidebar-sublogo-arrow">↗</span>
-          <img src="/jnb-sublogo.png" alt={t.logoAlt} />
-        </a>
+        <div className="sidebar-topbar">
+          <a
+            href="https://www.jnbglobal.kr/ko"
+            target="_blank"
+            rel="noreferrer"
+            className="sidebar-sublogo-card"
+          >
+            <span className="sidebar-sublogo-arrow">↗</span>
+            <img src="/jnb-sublogo.png" alt={t.logoAlt} />
+          </a>
 
-        <div className="lang-switch-group">
-          {LANGS.map((l) => (
-            <Link key={l} to={`/${l}`} className={`lang-switch ${l === lang ? "active" : ""}`}>
-              {t.langSwitch[l]}
-            </Link>
-          ))}
+          <LangDropdown lang={lang} langSwitch={t.langSwitch} />
         </div>
 
         <nav className="sidebar-nav">
