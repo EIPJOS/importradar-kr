@@ -23,6 +23,7 @@ function LangDropdown({ lang, langSwitch }) {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
+        <span className="lang-dropdown-icon" aria-hidden="true">🌐</span>
         {langSwitch[lang]} <span className={`chevron ${open ? "open" : ""}`}>▾</span>
       </button>
       {open && (
