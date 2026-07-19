@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { browseHsCodes, browseHsCodesInChapter, getChapterCounts } from "../lib/supabase.js";
 import { HS_SECTIONS, findChapterName } from "../lib/hsSections.js";
-import { useT } from "../lib/i18n.jsx";
+import { useT, useLang } from "../lib/i18n.jsx";
 
 const fmtHS = (hs) =>
   hs && hs.length >= 6 ? `${hs.slice(0, 4)}.${hs.slice(4, 6)}${hs.length > 6 ? "-" + hs.slice(6) : ""}` : hs;
@@ -32,6 +32,7 @@ function ResultTable({ rows, onSelect }) {
 
 export default function HsCodeBrowser({ onSelect }) {
   const t = useT("hsBrowser");
+  const lang = useLang();
   const [q, setQ] = useState("");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +96,7 @@ export default function HsCodeBrowser({ onSelect }) {
       <section className="browser">
         <div className="browser-head">
           <h2>
-            {t.chapterTitle(Number(chapter))} {findChapterName(chapter)}
+            {t.chapterTitle(Number(chapter))} {findChapterName(chapter, lang)}
           </h2>
           <span className="browser-count">{t.count(chapterCounts?.get(chapter) ?? "—")}</span>
         </div>
@@ -171,7 +172,7 @@ export default function HsCodeBrowser({ onSelect }) {
               onClick={() => setOpenSection(openSection === section.no ? null : section.no)}
             >
               <span className="no">{t.sectionLabel(section.no)}</span>
-              <span className="name">{section.name}</span>
+              <span className="name">{section.name[lang]}</span>
               <span className={`chevron ${openSection === section.no ? "open" : ""}`}>▾</span>
             </button>
             {openSection === section.no && (
@@ -179,7 +180,7 @@ export default function HsCodeBrowser({ onSelect }) {
                 {section.chapters.map((c) => (
                   <button type="button" key={c.no} className="chapter-row" onClick={() => openChapter(c.no)}>
                     <span className="no">{t.chapterLabel(c.no)}</span>
-                    <span className="name">{c.name}</span>
+                    <span className="name">{c.name[lang]}</span>
                     <span className="count">{chapterCounts?.get(c.no) ? t.count(chapterCounts.get(c.no)) : ""}</span>
                   </button>
                 ))}
