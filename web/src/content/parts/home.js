@@ -45,7 +45,7 @@ export default {
   },
   en: {
     partnerCredit: "JNB Global Customs · Import Clearance Specialist Customs Brokers",
-    heroTitle: ["Wondering if your import will clear customs?", "Find out with a single search"],
+    heroTitle: ["Import Clearance,", "Find Out with a Single Search"],
     heroSub: "Just enter an HS code or item name and instantly see customs-officer-confirmation requirements, past rejection/recall history, and related regulation updates — all on one screen.",
     stats: [
       { value: "1,425", label: "Rejection/Recall Records" },
@@ -89,7 +89,7 @@ export default {
   },
   cn: {
     partnerCredit: "JNB Global Customs · 进口通关专业报关行",
-    heroTitle: ["进口通关能否顺利完成", "一次搜索即可确认"],
+    heroTitle: ["进口通关，", "一次搜索即可确认"],
     heroSub: "只需输入HS编码或品名，即可在同一画面即时查看海关确认要件、过往不合格·召回记录及相关法规修订。",
     stats: [
       { value: "1,425件", label: "不合格·召回记录" },
