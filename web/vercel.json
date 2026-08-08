@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/:lang(ko|en|cn)/hs/:code", "destination": "/api/hs-page?lang=:lang&code=:code" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

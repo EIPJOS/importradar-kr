@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { searchUnified } from "./lib/supabase.js";
 import Seal from "./components/Seal.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -36,6 +36,8 @@ function App() {
   const t = useT("home");
   const tc = useT("common");
   const fmtDate = (d) => (d ? d.replaceAll("-", ".") : t.dateUnknown);
+  const { code: routeCode } = useParams();
+  const [searchParams] = useSearchParams();
 
   const [view, setView] = useState("home"); // "home" | "browse"
   const [q, setQ] = useState("");
@@ -100,6 +102,21 @@ function App() {
     runSearch(hsCode);
   }
 
+  // 진입 경로 2가지에서 자동으로 검색을 실행한다:
+  // 1) /:lang/hs/:code — HsCodeBrowser 등에서 앱이 이미 떠 있는 상태로 클라이언트 사이드 이동한 경우
+  // 2) /:lang?q=code — HS코드별 SEO 정적 페이지(api/hs-page.js)의 "실시간 조회하기" CTA로 진입한 경우
+  // 최초 진입(크롤러/새 탭)은 vercel.json rewrite가 /api/hs-page로 보내 이 컴포넌트 자체를 안 타므로
+  // 이 effect는 항상 "이미 로드된 SPA로의 이동"에만 관여한다.
+  // 의존성을 routeCode/qParam으로 둔 이유: "/:lang"과 "/:lang/hs/:code"는 형제 Route라
+  // 서로 전환돼도 React가 App을 리마운트하지 않는다 — mount-only([]) effect로는 이후
+  // 클라이언트 사이드 이동(예: HsCodeBrowser 행 클릭)에서 재실행되지 않는다.
+  const qParam = searchParams.get("q");
+  useEffect(() => {
+    const initialCode = routeCode || qParam;
+    if (initialCode) onSelectHsCode(initialCode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeCode, qParam]);
+
   const req = result?.requirements ?? [];
   const hist = result?.history ?? [];
   const regs = result?.regulations ?? [];
@@ -117,7 +134,7 @@ function App() {
 
         {view === "browse" && (
           <div className="browse-page">
-            <HsCodeBrowser onSelect={onSelectHsCode} />
+            <HsCodeBrowser />
           </div>
         )}
 

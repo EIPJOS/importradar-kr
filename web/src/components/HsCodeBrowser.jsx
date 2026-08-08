@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { browseHsCodes, browseHsCodesInChapter, getChapterCounts } from "../lib/supabase.js";
 import { HS_SECTIONS, findChapterName } from "../lib/hsSections.js";
 import { useT, useLang } from "../lib/i18n.jsx";
@@ -6,8 +7,10 @@ import { useT, useLang } from "../lib/i18n.jsx";
 const fmtHS = (hs) =>
   hs && hs.length >= 6 ? `${hs.slice(0, 4)}.${hs.slice(4, 6)}${hs.length > 6 ? "-" + hs.slice(6) : ""}` : hs;
 
-function ResultTable({ rows, onSelect }) {
+function ResultTable({ rows }) {
   const t = useT("hsBrowser");
+  const lang = useLang();
+  const navigate = useNavigate();
   return (
     <table className="browser-table">
       <thead>
@@ -19,8 +22,12 @@ function ResultTable({ rows, onSelect }) {
       </thead>
       <tbody>
         {rows.map((r) => (
-          <tr key={r.hs_code} onClick={() => onSelect(r.hs_code)} className="clickable">
-            <td className="hs">{fmtHS(r.hs_code)}</td>
+          <tr key={r.hs_code} onClick={() => navigate(`/${lang}/hs/${r.hs_code}`)} className="clickable">
+            <td className="hs">
+              <a href={`/${lang}/hs/${r.hs_code}`} onClick={(e) => e.preventDefault()}>
+                {fmtHS(r.hs_code)}
+              </a>
+            </td>
             <td>{r.name_ko ?? "—"}</td>
             <td className="en">{r.name_en ?? "—"}</td>
           </tr>
@@ -30,7 +37,7 @@ function ResultTable({ rows, onSelect }) {
   );
 }
 
-export default function HsCodeBrowser({ onSelect }) {
+export default function HsCodeBrowser() {
   const t = useT("hsBrowser");
   const lang = useLang();
   const [q, setQ] = useState("");
@@ -112,7 +119,7 @@ export default function HsCodeBrowser({ onSelect }) {
         />
         {chapterLoading && <p className="empty">{t.loading}</p>}
         {!chapterLoading && chapterRows.length === 0 && <p className="empty">{t.noResultsChapter}</p>}
-        {!chapterLoading && chapterRows.length > 0 && <ResultTable rows={chapterRows} onSelect={onSelect} />}
+        {!chapterLoading && chapterRows.length > 0 && <ResultTable rows={chapterRows} />}
         {!chapterLoading && chapterRows.length === 120 && (
           <p className="browser-more">{t.moreResultsChapter}</p>
         )}
@@ -139,7 +146,7 @@ export default function HsCodeBrowser({ onSelect }) {
         {!loading && rows.length === 0 && (
           <p className="empty">{t.noResultsSearch}</p>
         )}
-        {!loading && rows.length > 0 && <ResultTable rows={rows} onSelect={onSelect} />}
+        {!loading && rows.length > 0 && <ResultTable rows={rows} />}
         {!loading && rows.length === 60 && (
           <p className="browser-more">{t.moreResultsSearch}</p>
         )}
@@ -196,7 +203,7 @@ export default function HsCodeBrowser({ onSelect }) {
           <p className="classify-note" style={{ marginTop: 16 }}>
             {t.frequentItems}
           </p>
-          <ResultTable rows={rows} onSelect={onSelect} />
+          <ResultTable rows={rows} />
         </>
       )}
     </section>

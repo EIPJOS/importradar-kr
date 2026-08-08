@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://customs-mate.vercel.app/sitemap-hs.xml

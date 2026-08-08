@@ -9,6 +9,7 @@ createRoot(document.getElementById("root")).render(
     <Routes>
       <Route path="/" element={<Navigate to="/ko" replace />} />
       <Route path="/:lang" element={<App />} />
+      <Route path="/:lang/hs/:code" element={<App />} />
       <Route path="*" element={<Navigate to="/ko" replace />} />
     </Routes>
   </BrowserRouter>
