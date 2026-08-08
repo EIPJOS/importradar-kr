@@ -384,6 +384,44 @@ button, a, input, textarea {
 
 .error { color: var(--seal); font-size: 14px; font-weight: 600; margin-bottom: 16px; }
 
+.alert-subscribe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  background: var(--brass-soft);
+  border: 1px solid var(--brass);
+  border-radius: var(--radius);
+}
+.alert-subscribe-text { display: flex; flex-direction: column; gap: 2px; }
+.alert-subscribe-text strong { font-size: 13.5px; color: var(--ink); }
+.alert-subscribe-text span { font-size: 12.5px; color: var(--ink-soft); }
+.alert-subscribe-form { display: flex; gap: 8px; }
+.alert-subscribe-form input {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--sans);
+  min-width: 200px;
+}
+.alert-subscribe-form button {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--brass);
+  cursor: pointer;
+}
+.alert-subscribe-form button:disabled { opacity: 0.6; cursor: wait; }
+.alert-subscribe-msg { font-size: 13px; color: var(--ink-soft); margin: 0; }
+.alert-subscribe-msg.error { color: var(--seal); margin: 0; }
+
 .verify-strip {
   display: flex;
   align-items: center;

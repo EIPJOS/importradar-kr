@@ -226,6 +226,14 @@ export async function searchInspectionItems(query, category) {
   return data ?? [];
 }
 
+// 관심 HS코드 알림 구독 신청 (leads/OneQ의 직접 insert 패턴과 동일).
+// DB 트리거가 send-hs-alert-confirmation-email을 호출해 확인 메일을 보낸다 —
+// 더블 옵트인이라 이 시점엔 아직 confirmed_at이 비어있다.
+export async function subscribeHsAlert(email, hsCode, lang) {
+  const { error } = await supabase.from("hs_alert_subscriptions").insert({ email, hs_code: hsCode, lang });
+  if (error) throw error;
+}
+
 export async function getTariffRates(hsCode) {
   const hs = hsCode.replace(/\D/g, "");
   const { data, error } = await supabase

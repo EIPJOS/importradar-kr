@@ -7,6 +7,7 @@
     "sync:rejections": "node jobs/sync_rejections.js",
     "sync:recalls": "node jobs/sync_recalls.js",
     "sync:laws": "node jobs/sync_law_updates.js",
+    "sync:hsalerts": "node jobs/send_hs_alerts.js",
     "sync:hscodes": "node jobs/sync_hs_codes.js",
     "sync:tariff": "node jobs/sync_tariff_rates.js",
     "sync:kc": "node jobs/sync_kc_categories.js",

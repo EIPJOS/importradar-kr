@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: "실행할 잡 (all/rejections/recalls/laws)"
+        description: "실행할 잡 (all/rejections/recalls/laws) — laws 선택 시 hs alert digest도 함께 실행됨"
         default: "all"
 
 jobs:
@@ -20,6 +20,7 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      INTERNAL_JOB_SECRET: ${{ secrets.INTERNAL_JOB_SECRET }}
     defaults:
       run:
         working-directory: pipeline
@@ -45,6 +46,12 @@ jobs:
       - name: weekly law updates
         if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
         run: npm run sync:laws
+
+      # 관심 HS코드 알림 — 위에서 갱신된 regulation_updates를 확인된 구독과 매칭해 발송.
+      # 별도 cron 없이 법령 동기화 직후에 이어 실행(같은 조건).
+      - name: weekly hs code alert digest
+        if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
+        run: npm run sync:hsalerts
 
       # HS코드 마스터 목록(pipeline/jobs/sync_hs_codes.js)은 GitHub Actions에서 자동 실행 안 함:
       # www.data.go.kr(포털)이 해외/클라우드 IP를 차단해 GH Actions 러너에서 연결 자체가 안 됨

@@ -13,6 +13,7 @@ import InspectionCostCheck from "./components/InspectionCostCheck.jsx";
 import NutritionRequirementCheck from "./components/NutritionRequirementCheck.jsx";
 import NutritionPercentCalc from "./components/NutritionPercentCalc.jsx";
 import QuarantineRequestForm from "./components/QuarantineRequestForm.jsx";
+import HsAlertSubscribe from "./components/HsAlertSubscribe.jsx";
 import AboutCompany from "./components/AboutCompany.jsx";
 import { useT, LangContext } from "./lib/i18n.jsx";
 import CONTENT from "./content/index.js";
@@ -288,6 +289,8 @@ function App() {
                       <span className="tab-dot reg" /> {t.tabReg} <em>{regs.length}</em>
                     </button>
                   </nav>
+
+                  {/^\d{4,}$/.test(q.trim()) && <HsAlertSubscribe hsCode={q.trim()} />}
 
                   {tab === "req" && (
                     <div>
