@@ -48,9 +48,12 @@ jobs:
       # 세관장확인대상물품(requirements)은 검색 시 실시간 조회+캐시하는
       # Supabase Edge Function(requirements-lookup)으로 이전됨. pipeline/jobs/sync_requirements.js
       # 참고용으로만 리포에 남겨둠.
+      # law.go.kr도 같은 이유로 간헐적 타임아웃이 남 — 실패해도 아래 hs alert digest는
+      # 계속 실행되게 continue-on-error(그 시점까지 DB에 있던 regulation_updates로 매칭).
       - name: weekly law updates
         if: github.event.schedule == '0 21 * * 0' || contains(fromJSON('["all","laws"]'), inputs.job)
         run: npm run sync:laws
+        continue-on-error: true
 
       # 관심 HS코드 알림 — 위에서 갱신된 regulation_updates를 확인된 구독과 매칭해 발송.
       # 별도 cron 없이 법령 동기화 직후에 이어 실행(같은 조건).
