@@ -32,12 +32,17 @@ jobs:
       - run: npm ci || npm install
 
       # 매일: 부적합 + 회수
+      # apis.data.go.kr가 GH Actions 러너발 연결에 간헐적으로 타임아웃을 낸다(외부망 문제,
+      # 코드 문제 아님). continue-on-error로 한쪽이 실패해도 잡 전체가 "failed" 처리되어
+      # 아래 주간 법령/알림 스텝까지 스킵되는 일이 없게 한다.
       - name: daily rejections
         if: github.event.schedule == '30 20 * * *' || contains(fromJSON('["all","rejections"]'), inputs.job)
         run: npm run sync:rejections
+        continue-on-error: true
       - name: daily recalls
         if: github.event.schedule == '30 20 * * *' || contains(fromJSON('["all","recalls"]'), inputs.job)
         run: npm run sync:recalls
+        continue-on-error: true
 
       # 매주: 법령
       # 세관장확인대상물품(requirements)은 검색 시 실시간 조회+캐시하는
